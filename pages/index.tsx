@@ -16,8 +16,8 @@ export default function IndexPage(): JSX.Element {
   return (
     <Layout id="home" title="Home">
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <Typography variant="h1">About Me</Typography>
-        <Typography variant="h2">a brief note on my career</Typography>
+        <Typography variant="h1">Webgl-plot</Typography>
+        <Typography variant="h2">a high performance plotting library based on WebGL</Typography>
       </div>
     </Layout>
   );

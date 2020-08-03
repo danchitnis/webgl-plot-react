@@ -44,7 +44,7 @@ const menuList = [
     href: "/sine",
   },
   { id: "random", text: "Random App", icon: "", href: "/random" },
-  { id: "contact", text: "Contact", icon: "", href: "/contact" },
+  { id: "histogram", text: "Hist App", icon: "", href: "/histogram" },
 ] as MenuList[];
 
 export default function MenuList({ id }: Props) {
@@ -69,7 +69,7 @@ export default function MenuList({ id }: Props) {
         ))}
 
         <MuiLink
-          href="https://google.co.uk"
+          href="https://github.com/danchitnis/webgl-plot"
           target="_blank"
           rel="noopener"
           variant="inherit"
