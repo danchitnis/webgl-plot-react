@@ -38,10 +38,10 @@ const menuList = [
     href: "/",
   },
   {
-    id: "pubs",
-    text: "Publications",
+    id: "sin",
+    text: "Sin App",
     icon: "",
-    href: "/publications",
+    href: "/webglappSin",
   },
   { id: "projects", text: "Projects", icon: "", href: "/projects/projects" },
   { id: "contact", text: "Contact", icon: "", href: "/contact" },
