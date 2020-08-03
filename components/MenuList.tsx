@@ -39,11 +39,11 @@ const menuList = [
   },
   {
     id: "sin",
-    text: "Sin App",
+    text: "Sine App",
     icon: "",
-    href: "/webglappSin",
+    href: "/sine",
   },
-  { id: "projects", text: "Projects", icon: "", href: "/projects/projects" },
+  { id: "random", text: "Random App", icon: "", href: "/random" },
   { id: "contact", text: "Contact", icon: "", href: "/contact" },
 ] as MenuList[];
 

@@ -9,6 +9,7 @@
     "now": "now --prod"
   },
   "dependencies": {
+    "@danchitnis/react-fps-stats": "^0.3.1",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",

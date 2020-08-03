@@ -7,7 +7,7 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { Chip, Avatar } from "@material-ui/core";
 
-import CustomSlider from "../webglappSin/CustomSlider";
+import CustomSlider from "../sine/CustomSlider";
 
 import WebGlPlot, { WebglStep, ColorRGBA } from "webgl-plot";
 
