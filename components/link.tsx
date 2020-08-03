@@ -52,7 +52,7 @@ function Link(props: LinkProps) {
   });
 
   if (naked) {
-    return <NextComposed className={className} ref={innerRef} href={href} {...other} />;
+    //return <NextComposed className={className} ref={innerRef} href={href} {...other} />;
   }
 
   return (

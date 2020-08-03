@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 
-import { Chip, Avatar, Typography } from "@material-ui/core";
+import { Chip, Avatar } from "@material-ui/core";
 
 import CustomSlider from "../sine/CustomSlider";
 
@@ -17,12 +17,6 @@ let webglp: WebGlPlot;
 let lines: WebglLine[];
 let numX = 1;
 
-type Slider = {
-  min?: number;
-  max?: number;
-  value?: number;
-};
-
 export default function WebglAppRandom(): JSX.Element {
   const [shiftSize, setShiftSize] = useState(1);
   const [numLines, setNumLines] = useState(1);
@@ -31,35 +25,34 @@ export default function WebglAppRandom(): JSX.Element {
   const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
-  const canvasDraw = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    numX = Math.round(canvasMain.current.getBoundingClientRect().width);
-  }, []);
 
   useEffect(() => {
     if (canvasMain.current) {
       webglp = new WebGlPlot(canvasMain.current);
+      numX = Math.round(canvasMain.current.getBoundingClientRect().width);
+    }
+  }, [canvasMain]);
 
-      lines = [];
+  useEffect(() => {
+    webglp.lines = [];
+    lines = [];
 
-      const numLinesActual = numList[numLines];
+    const numLinesActual = numList[numLines];
 
-      for (let i = 0; i < numLinesActual; i++) {
-        const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-        lines.push(new WebglLine(color, numX));
-      }
+    for (let i = 0; i < numLinesActual; i++) {
+      const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
+      lines.push(new WebglLine(color, numX));
+    }
 
+    lines.forEach((line) => {
+      webglp.addLine(line);
+    });
+
+    for (let i = 0; i < numX; i++) {
+      // set x to -num/2:1:+num/2
       lines.forEach((line) => {
-        webglp.addLine(line);
+        line.lineSpaceX(-1, 2 / numX);
       });
-
-      for (let i = 0; i < numX; i++) {
-        // set x to -num/2:1:+num/2
-        lines.forEach((line) => {
-          line.lineSpaceX(-1, 2 / numX);
-        });
-      }
     }
   }, [numLines]);
 
@@ -86,7 +79,7 @@ export default function WebglAppRandom(): JSX.Element {
     id = requestAnimationFrame(renderPlot);
 
     return (): void => {
-      renderPlot = null;
+      renderPlot.prototype = null;
       cancelAnimationFrame(id);
     };
   }, [shiftSize]);
@@ -107,13 +100,13 @@ export default function WebglAppRandom(): JSX.Element {
   const [slider, setSlider] = React.useState(1);
   //let slider = 1;
 
-  const onDrag = (event: any, newSlider: number | number[]): void => {
+  const onDrag = (_event: any, newSlider: number | number[]): void => {
     setSlider(newSlider as number);
     //slider = newSlider as number;
     setShiftSize(newSlider as number);
   };
 
-  const onUpdate = (event: any, newSlider: number | number[]): void => {
+  const onUpdate = (_event: any, newSlider: number | number[]): void => {
     //setSlider(newSlider as number);
     setNumLines(newSlider as number);
   };
@@ -164,15 +157,15 @@ export default function WebglAppRandom(): JSX.Element {
     console.log(slider);
   };
 
-  const onYScale = (event: any, newSlider: number | number[]): void => {
+  const onYScale = (_event: any, newSlider: number | number[]): void => {
     setYScale(newSlider as number);
   };
 
-  const [sliderComp, setSliderComp] = useState<JSX.Element>(null);
+  const [sliderComp, setSliderComp] = useState<JSX.Element>();
 
   const [param, setParam] = React.useState<string | null>("shift");
 
-  const handleParam = (event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
+  const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
     setParam(newParam);
   };
 

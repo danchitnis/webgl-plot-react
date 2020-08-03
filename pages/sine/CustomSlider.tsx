@@ -1,14 +1,8 @@
-import React, { FC, ReactElement } from "react";
-import Slider, { SliderProps, SliderTypeMap } from "@material-ui/core/Slider";
-import Typography from "@material-ui/core/Typography";
-import Tooltip from "@material-ui/core/Tooltip";
-import {
-  withStyles,
-  makeStyles,
-  createMuiTheme,
-  MuiThemeProvider,
-  ThemeProvider,
-} from "@material-ui/core/styles";
+import React from "react";
+import Slider, { SliderProps } from "@material-ui/core/Slider";
+//import Typography from "@material-ui/core/Typography";
+//import Tooltip from "@material-ui/core/Tooltip";
+import { withStyles } from "@material-ui/core/styles";
 
 //rgba(136, 136, 136, 0.5)
 

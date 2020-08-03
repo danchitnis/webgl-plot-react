@@ -13,7 +13,7 @@ import Layout from "../../components/Layout";
 let webglp: WebGlPlot;
 let line: WebglStep;
 
-const randXSize = 10;
+//const randXSize = 10;
 
 let X: Float32Array;
 let xbins: Float32Array;
@@ -27,12 +27,6 @@ const xmax = 100;
 //const Xmax = 75;
 //const Xskew = 1;
 
-type Slider = {
-  min?: number;
-  max?: number;
-  value?: number;
-};
-
 export default function WebglAppHistogram(): JSX.Element {
   //states
   const [numBins, setNumBins] = useState(100);
@@ -40,7 +34,7 @@ export default function WebglAppHistogram(): JSX.Element {
   const [Xrange, setXrange] = useState<number[]>([25, 75]);
   const [Xskew, setXskew] = useState(1);
 
-  const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
+  //const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
@@ -52,11 +46,9 @@ export default function WebglAppHistogram(): JSX.Element {
     if (canvasMain.current) {
       webglp = new WebGlPlot(canvasMain.current);
     }
-  }, []);
+  }, [canvasMain]);
 
   useEffect(() => {
-    webglp = new WebGlPlot(canvasMain.current);
-
     xbins = new Float32Array(numBins);
     ybins = new Float32Array(numBins);
 
@@ -144,17 +136,17 @@ export default function WebglAppHistogram(): JSX.Element {
     id = requestAnimationFrame(renderPlot);
 
     return (): void => {
-      renderPlot = null;
+      renderPlot.prototype = null;
       // remove the previous line here!!!!!!!!!!
       cancelAnimationFrame(id);
     };
   }, [randXSize, numBins, Xrange, Xskew]);
 
-  const [sliderComp, setSliderComp] = useState<JSX.Element>(null);
+  const [sliderComp, setSliderComp] = useState<JSX.Element>();
 
   const [param, setParam] = React.useState<string | null>("randXSize");
 
-  const handleParam = (event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
+  const handleParam = (_event: React.MouseEvent, newParam: string | null): void => {
     setParam(newParam);
   };
 
@@ -188,8 +180,7 @@ export default function WebglAppHistogram(): JSX.Element {
         max={4}
         step={0.1}
         defaultValue={Math.log10(randXSize)}
-        //onChange={onDrag}
-        onChange={(event: any, newSlider: number | number[]) => {
+        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
           const rxs = Math.pow(10, newSlider as number);
           setRandXSize(Math.round(rxs));
         }}
@@ -207,7 +198,7 @@ export default function WebglAppHistogram(): JSX.Element {
         step={1}
         defaultValue={numBins}
         //onChange={onDrag}
-        onChange={(event: any, newSlider: number | number[]) => {
+        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
           setNumBins(newSlider as number);
         }}
       />
@@ -224,7 +215,7 @@ export default function WebglAppHistogram(): JSX.Element {
         step={1}
         defaultValue={Xrange}
         //onChange={onDrag}
-        onChange={(event: any, newSlider: number | number[]) => {
+        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
           setXrange(newSlider as number[]);
         }}
       />
@@ -241,7 +232,7 @@ export default function WebglAppHistogram(): JSX.Element {
         step={0.01}
         defaultValue={Xskew}
         //onChange={onDrag}
-        onChange={(event: any, newSlider: number | number[]) => {
+        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
           setXskew(newSlider as number);
         }}
       />

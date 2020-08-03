@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import Typography from "@material-ui/core/Typography";
 
 export default function IndexPage(): JSX.Element {
-  const introStyle = {
+  /*const introStyle = {
     width: "80%",
   } as React.CSSProperties;
 
@@ -12,6 +12,7 @@ export default function IndexPage(): JSX.Element {
     width: "60%",
     marginBottom: "1em",
   } as React.CSSProperties;
+  */
 
   return (
     <Layout id="home" title="Home">
