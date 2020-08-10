@@ -32,6 +32,10 @@ export default function SinApp(): JSX.Element {
 
   useEffect(() => {
     if (canvasMain.current) {
+      const devicePixelRatio = window.devicePixelRatio || 1;
+      canvasMain.current.width = canvasMain.current.clientWidth * devicePixelRatio;
+      canvasMain.current.height = canvasMain.current.clientHeight * devicePixelRatio;
+
       webglp = new WebGlPlot(canvasMain.current);
 
       numX = Math.round(canvasMain.current.getBoundingClientRect().width);
