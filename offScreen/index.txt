@@ -8,7 +8,9 @@ import { Chip, Avatar } from "@material-ui/core";
 import CustomSlider from "../../components/CustomSlider";
 import Layout from "../../components/Layout";
 
-import { wrap, transfer } from "comlink";
+//import { wrap, transfer } from "comlink";
+import * as Comlink from "comlink";
+import { WorkerApi } from "./offScreen-worker";
 
 export default function SinApp(): JSX.Element {
   //const freq = useParam();
@@ -26,26 +28,35 @@ export default function SinApp(): JSX.Element {
 
   const [slider, setSlider] = React.useState<number>(50);
 
+  const comlinkWorkerRef = React.useRef<Worker>();
+  const comlinkWorkerApiRef = React.useRef<Comlink.Remote<WorkerApi>>();
+
   useEffect(() => {
     if (canvasMain.current) {
-      init(canvasMain.current);
+      const htmlCanvas = canvasMain.current;
+      const offscreen = htmlCanvas.transferControlToOffscreen();
+
+      offscreen.width = htmlCanvas.clientWidth * window.devicePixelRatio;
+      offscreen.height = htmlCanvas.clientHeight * window.devicePixelRatio;
+
+      comlinkWorkerRef.current = new Worker("./offScreen-worker", {
+        type: "module",
+      });
+      comlinkWorkerApiRef.current = Comlink.wrap<WorkerApi>(comlinkWorkerRef.current);
+      init(offscreen);
     }
   }, [canvasMain]);
 
-  const init = async (htmlCanvas: HTMLCanvasElement) => {
-    const offscreen = htmlCanvas.transferControlToOffscreen();
-
-    offscreen.width = htmlCanvas.clientWidth * window.devicePixelRatio;
-    offscreen.height = htmlCanvas.clientHeight * window.devicePixelRatio;
-
-    const worker = new Worker("./offScreen-worker", { type: "module" });
-    const workerApi = wrap<import("./offScreen-worker").CanvasWorker>(worker);
-    await workerApi.run(transfer(offscreen, [offscreen]));
-    await workerApi.set(0.8);
+  const init = async (offscreen: OffscreenCanvas) => {
+    //const worker = new Worker("./offScreen-worker", { type: "module" });
+    //const workerApi = Comlink.wrap<import("./offScreen-worker").WorkerApi>(worker);
+    const a = await comlinkWorkerApiRef.current?.run(Comlink.transfer(offscreen, [offscreen]));
+    console.log(a);
+    //await workerApi.set(0.8);
   };
 
   useEffect(() => {
-    let id = 0;
+    //let id = 0;
   }, [freq, amp, noiseAmp, noisePhase]);
 
   const canvasStyle = {

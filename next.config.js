@@ -1,7 +1,6 @@
 const WorkerPlugin = require("worker-plugin");
 
 module.exports = {
-  distDir: "build",
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     if (!isServer) {
       config.plugins.push(
@@ -13,4 +12,5 @@ module.exports = {
     }
     return config;
   },
+  //distDir: "build",
 };
