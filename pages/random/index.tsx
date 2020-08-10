@@ -1,3 +1,5 @@
+import dynamic from "next/dynamic";
+
 import React, { useState, useEffect, useRef } from "react";
 
 import ToggleButton from "@material-ui/lab/ToggleButton";
@@ -5,7 +7,7 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 
 import { Chip, Avatar } from "@material-ui/core";
 
-import CustomSlider from "../sine/CustomSlider";
+import CustomSlider from "../../components/CustomSlider";
 
 import WebGlPlot, { WebglLine, ColorRGBA } from "webgl-plot";
 

@@ -3,16 +3,12 @@ import React, { useState, useEffect, useRef } from "react";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 
-import WebGlPlot, { WebglLine, ColorRGBA } from "webgl-plot";
-
 import { Chip, Avatar } from "@material-ui/core";
 
 import CustomSlider from "../../components/CustomSlider";
 import Layout from "../../components/Layout";
 
-let webglp: WebGlPlot;
-let line: WebglLine;
-let numX: number;
+import { wrap, transfer } from "comlink";
 
 export default function SinApp(): JSX.Element {
   //const freq = useParam();
@@ -32,49 +28,24 @@ export default function SinApp(): JSX.Element {
 
   useEffect(() => {
     if (canvasMain.current) {
-      const devicePixelRatio = window.devicePixelRatio || 1;
-      canvasMain.current.width = canvasMain.current.clientWidth * devicePixelRatio;
-      canvasMain.current.height = canvasMain.current.clientHeight * devicePixelRatio;
-
-      webglp = new WebGlPlot(canvasMain.current);
-
-      numX = Math.round(canvasMain.current.getBoundingClientRect().width);
-
-      line = new WebglLine(new ColorRGBA(1, 0, 0, 1), numX);
-      webglp.addLine(line);
-
-      line.lineSpaceX(-1, 2 / numX);
-
-      //this.setState({ Amp: 0.5 });
+      init(canvasMain.current);
     }
   }, [canvasMain]);
 
+  const init = async (htmlCanvas: HTMLCanvasElement) => {
+    const offscreen = htmlCanvas.transferControlToOffscreen();
+
+    offscreen.width = htmlCanvas.clientWidth * window.devicePixelRatio;
+    offscreen.height = htmlCanvas.clientHeight * window.devicePixelRatio;
+
+    const worker = new Worker("./offScreen-worker", { type: "module" });
+    const workerApi = wrap<import("./offScreen-worker").CanvasWorker>(worker);
+    await workerApi.run(transfer(offscreen, [offscreen]));
+    await workerApi.set(0.8);
+  };
+
   useEffect(() => {
     let id = 0;
-
-    let renderPlot = (): void => {
-      const freqA = (freq * 1) / numX;
-      //const noise = 0.1;
-      //const amp = 0.5;
-      const noiseA = noiseAmp == undefined ? 0.1 : noiseAmp;
-      const noiseP = noisePhase == undefined ? 0 : noisePhase;
-
-      const phase = noiseP * 2 * Math.PI * Math.random();
-
-      for (let i = 0; i < line.numPoints; i++) {
-        const ySin = Math.sin(Math.PI * i * freqA * Math.PI * 2 + phase);
-        const yNoise = Math.random() - 0.5;
-        line.setY(i, ySin * amp + yNoise * noiseA);
-      }
-      id = requestAnimationFrame(renderPlot);
-      webglp.update();
-    };
-    id = requestAnimationFrame(renderPlot);
-
-    return (): void => {
-      renderPlot = (): void => {};
-      cancelAnimationFrame(id);
-    };
   }, [freq, amp, noiseAmp, noisePhase]);
 
   const canvasStyle = {

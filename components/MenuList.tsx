@@ -45,6 +45,7 @@ const menuList = [
   },
   { id: "random", text: "Random App", icon: "", href: "/random" },
   { id: "histogram", text: "Hist App", icon: "", href: "/histogram" },
+  { id: "offScreen", text: "OffScreen", icon: "", href: "/offScreen" },
 ] as MenuList[];
 
 export default function MenuList({ id }: Props) {
