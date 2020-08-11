@@ -78,7 +78,7 @@ export default function MenuList({ id }: Props) {
           style={{ textDecoration: "none", flex: "1 1 0" }}>
           <ListItem button>
             <ListItemIcon>
-              <GitHubIcon />
+              <GitHubIcon style={{ maxHeight: "2em" }} />
             </ListItemIcon>
             <ListItemText primary="Github" />
           </ListItem>
