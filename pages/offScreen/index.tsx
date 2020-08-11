@@ -1,67 +1,61 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import Layout from "../../components/Layout";
 
-import ToggleButton from "@material-ui/lab/ToggleButton";
+import * as Comlink from "comlink";
+import { WorkerApi } from "../../workers/comlink.worker";
+
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import ToggleButton from "@material-ui/lab/ToggleButton";
 
 import { Chip, Avatar } from "@material-ui/core";
 
 import CustomSlider from "../../components/CustomSlider";
-import Layout from "../../components/Layout";
 
-//import { wrap, transfer } from "comlink";
-import * as Comlink from "comlink";
-import { WorkerApi } from "./offScreen-worker";
+//Assuming one instance only otherwise use useRef
+//see here: https://www.emgoto.com/storing-values-with-useref/
+let comlinkWorker: Worker;
+let comlinkWorkerApi: Comlink.Remote<WorkerApi>;
 
-export default function SinApp(): JSX.Element {
-  //const freq = useParam();
+export default function OffScreen(): JSX.Element {
+  // for standard
 
-  //const option = ["amp", "freq"];
+  // for comlink
 
-  //const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-
-  const [freq, setFreq] = useState(1);
   const [amp, setAmp] = useState(0.5);
+  const [freq, setFreq] = useState(0.1);
   const [noiseAmp, setNoiseAmp] = useState(0.1);
-  const [noisePhase] = useState(0.1);
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
   const [slider, setSlider] = React.useState<number>(50);
 
-  const comlinkWorkerRef = React.useRef<Worker>();
-  const comlinkWorkerApiRef = React.useRef<Comlink.Remote<WorkerApi>>();
+  //const comlinkWorkerRef = React.useRef<Worker>();
+  //const comlinkWorkerApiRef = React.useRef<Comlink.Remote<WorkerApi>>();
 
-  useEffect(() => {
+  React.useEffect(() => {
+    comlinkWorker = new Worker("../../workers/comlink.worker", { type: "module" });
+    comlinkWorkerApi = Comlink.wrap<WorkerApi>(comlinkWorker);
+
     if (canvasMain.current) {
       const htmlCanvas = canvasMain.current;
       const offscreen = htmlCanvas.transferControlToOffscreen();
 
       offscreen.width = htmlCanvas.clientWidth * window.devicePixelRatio;
       offscreen.height = htmlCanvas.clientHeight * window.devicePixelRatio;
-
-      comlinkWorkerRef.current = new Worker("./offScreen-worker", {
-        type: "module",
-      });
-      comlinkWorkerApiRef.current = Comlink.wrap<WorkerApi>(comlinkWorkerRef.current);
-      init(offscreen);
+      handleComlinkWork(offscreen);
     }
+
+    return () => {
+      comlinkWorker.terminate();
+    };
   }, [canvasMain]);
 
-  const init = async (offscreen: OffscreenCanvas) => {
-    //const worker = new Worker("./offScreen-worker", { type: "module" });
-    //const workerApi = Comlink.wrap<import("./offScreen-worker").WorkerApi>(worker);
-    const a = await comlinkWorkerApiRef.current?.run(Comlink.transfer(offscreen, [offscreen]));
-    console.log(a);
-    //await workerApi.set(0.8);
-  };
+  React.useEffect(() => {
+    comlinkWorkerApi.set(amp, freq, noiseAmp);
+  }, [amp, freq, noiseAmp]);
 
-  useEffect(() => {
-    //let id = 0;
-  }, [freq, amp, noiseAmp, noisePhase]);
-
-  const canvasStyle = {
-    width: "100%",
-    height: "70vh",
+  const handleComlinkWork = async (canvas: OffscreenCanvas) => {
+    await comlinkWorkerApi.start(Comlink.transfer(canvas, [canvas]));
   };
 
   const handleChange = (_event: React.SyntheticEvent, newSlider: unknown): void => {
@@ -75,7 +69,7 @@ export default function SinApp(): JSX.Element {
         break;
       }
       case param == "freq": {
-        setFreq(slider / 10);
+        setFreq(slider / 100);
         break;
       }
       case param == "noise": {
@@ -98,7 +92,7 @@ export default function SinApp(): JSX.Element {
         break;
       }
       case param == "freq": {
-        setSlider(freq * 10);
+        setSlider(freq * 100);
         break;
       }
       case param == "noise": {
@@ -115,8 +109,13 @@ export default function SinApp(): JSX.Element {
     textTransform: "none" as const,
   };
 
+  const canvasStyle = {
+    width: "100%",
+    height: "70vh",
+  };
+
   return (
-    <Layout id="sin" title="Sin App">
+    <Layout id="offScreen" title="OffScreen & WebWorker">
       <div
         style={{
           display: "flex",

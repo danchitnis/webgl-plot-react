@@ -46,7 +46,6 @@ const menuList = [
   { id: "random", text: "Random App", icon: "", href: "/random" },
   { id: "histogram", text: "Hist App", icon: "", href: "/histogram" },
   { id: "offScreen", text: "OffScreen", icon: "", href: "/offScreen" },
-  { id: "test", text: "Test", icon: "", href: "/test" },
 ] as MenuList[];
 
 export default function MenuList({ id }: Props) {
@@ -62,7 +61,7 @@ export default function MenuList({ id }: Props) {
               variant="inherit"
               color="inherit"
               style={{ textDecoration: "none", flex: "1 1 0" }}>
-              <ListItem button key={index} selected={id?.localeCompare(mL.id.toLowerCase()) == 0}>
+              <ListItem button key={index} selected={id?.localeCompare(mL.id) == 0}>
                 <ListItemIcon>{mL.icon}</ListItemIcon>
                 <ListItemText primary={mL.text} />
               </ListItem>

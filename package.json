@@ -14,14 +14,14 @@
     "@material-ui/icons": "next",
     "@material-ui/lab": "next",
     "comlink": "^4.3.0",
-    "next": "9.5.1",
+    "next": "9.5.2",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "webgl-plot": "^0.4.1"
   },
   "devDependencies": {
     "@types/node": "^14.0.27",
-    "@types/react": "^16.9.45",
+    "@types/react": "^16.9.46",
     "@types/react-dom": "^16.9.8",
     "now": "^19.2.0",
     "typescript": "3.9.7",
