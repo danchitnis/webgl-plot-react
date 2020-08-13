@@ -1,54 +1,34 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+import GitHubIcon from "@material-ui/icons/GitHub";
 
 import NextLink from "next/link";
 import MuiLink from "@material-ui/core/Link";
-import GitHubIcon from "@material-ui/icons/GitHub";
 
-//import { makeStyles, useTheme, Theme, createStyles } from "@material-ui/core/styles";
+import { MenuList } from "./MenuList";
 
 const MenuStyle = {
   display: "flex",
   flexDirection: "row",
   flex: "1 1 0",
-  transitionDuration: "1s",
+  //transitionDuration: "1s",
 } as React.CSSProperties;
 
+//prevent large icons when loading the page
+const styleIcon = {
+  maxHeight: "2em",
+} as CSSProperties;
+
 type Props = {
-  id?: string;
-  title?: string;
+  menuList: typeof MenuList;
+  pageId: string;
 };
 
-type MenuList = {
-  id: string;
-  text: string;
-  icon: string;
-  href: string;
-};
-
-const menuList = [
-  {
-    id: "home",
-    text: "Home",
-    icon: "",
-    href: "/",
-  },
-  {
-    id: "sin",
-    text: "Sine App",
-    icon: "",
-    href: "/sine",
-  },
-  { id: "random", text: "Random App", icon: "", href: "/random" },
-  { id: "histogram", text: "Hist App", icon: "", href: "/histogram" },
-  { id: "offScreen", text: "OffScreen", icon: "", href: "/offScreen" },
-] as MenuList[];
-
-export default function MenuList({ id }: Props) {
+export default function MenuTop({ menuList, pageId }: Props): JSX.Element {
   return (
     <div>
       <div />
@@ -61,7 +41,7 @@ export default function MenuList({ id }: Props) {
               variant="inherit"
               color="inherit"
               style={{ textDecoration: "none", flex: "1 1 0" }}>
-              <ListItem button key={index} selected={id?.localeCompare(mL.id) == 0}>
+              <ListItem button key={index} selected={pageId?.localeCompare(mL.id) == 0}>
                 <ListItemIcon>{mL.icon}</ListItemIcon>
                 <ListItemText primary={mL.text} />
               </ListItem>
@@ -70,7 +50,7 @@ export default function MenuList({ id }: Props) {
         ))}
 
         <MuiLink
-          href="https://github.com/danchitnis/webgl-plot"
+          href="https://github.com/danchitnis"
           target="_blank"
           rel="noopener"
           variant="inherit"
@@ -78,7 +58,7 @@ export default function MenuList({ id }: Props) {
           style={{ textDecoration: "none", flex: "1 1 0" }}>
           <ListItem button>
             <ListItemIcon>
-              <GitHubIcon style={{ maxHeight: "2em" }} />
+              <GitHubIcon style={styleIcon} />
             </ListItemIcon>
             <ListItemText primary="Github" />
           </ListItem>

@@ -25,6 +25,6 @@
     "@types/react-dom": "^16.9.8",
     "now": "^19.2.0",
     "typescript": "3.9.7",
-    "worker-plugin": "^4.0.3"
+    "worker-plugin": "^5.0.0"
   }
 }

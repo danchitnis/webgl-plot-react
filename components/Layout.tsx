@@ -7,7 +7,7 @@ import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 //import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 
-import MenuList from "./MenuList";
+import Menu from "../components/menu/Menu";
 
 type Props = {
   children?: ReactNode;
@@ -79,7 +79,7 @@ export default function Layout({
         </Head>
         <header>
           <nav>
-            <MenuList id={id} title={title}></MenuList>
+            <Menu id={id}></Menu>
           </nav>
         </header>
         {children}
