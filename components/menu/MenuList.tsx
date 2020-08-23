@@ -14,18 +14,14 @@ export type MenuListType = {
 
 export const MenuList = [
   {
-    id: "home",
-    text: "Home",
-    icon: "",
-    href: "/",
-  },
-  {
     id: "sin",
-    text: "Sine App",
+    text: "Sine",
     icon: "",
     href: "/sine",
   },
-  { id: "random", text: "Random App", icon: "", href: "/random" },
-  { id: "histogram", text: "Hist App", icon: "", href: "/histogram" },
+  { id: "random", text: "Random", icon: "", href: "/random" },
+  { id: "static", text: "Static", icon: "", href: "/random" },
+  { id: "histogram", text: "Histogram", icon: "", href: "/histogram" },
+  { id: "radar", text: "Radar", icon: "", href: "/histogram" },
   { id: "offScreen", text: "OffScreen", icon: "", href: "/offScreen" },
 ] as MenuListType[];

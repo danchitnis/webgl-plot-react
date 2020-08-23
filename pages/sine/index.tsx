@@ -11,7 +11,7 @@ import CustomSlider from "../../components/CustomSlider";
 import Layout from "../../components/Layout";
 
 let webglp: WebGlPlot;
-let line: WebglLine;
+let lines: WebglLine[];
 let numX: number;
 
 export default function SinApp(): JSX.Element {
@@ -24,7 +24,8 @@ export default function SinApp(): JSX.Element {
   const [freq, setFreq] = useState(1);
   const [amp, setAmp] = useState(0.5);
   const [noiseAmp, setNoiseAmp] = useState(0.1);
-  const [noisePhase] = useState(0.1);
+  const [noisePhase, setNoisePhase] = useState(0.1);
+  const [lineNum, setLineNum] = useState(1);
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
@@ -39,15 +40,22 @@ export default function SinApp(): JSX.Element {
       webglp = new WebGlPlot(canvasMain.current);
 
       numX = Math.round(canvasMain.current.getBoundingClientRect().width);
-
-      line = new WebglLine(new ColorRGBA(1, 0, 0, 1), numX);
-      webglp.addLine(line);
-
-      line.lineSpaceX(-1, 2 / numX);
-
-      //this.setState({ Amp: 0.5 });
     }
   }, [canvasMain]);
+
+  useEffect(() => {
+    lines = [];
+    for (let i = 0; i < lineNum; i++) {
+      const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
+      const line = new WebglLine(color, numX);
+      line.lineSpaceX(-1, 2 / numX);
+      lines.push(line);
+      webglp.addLine(line);
+    }
+    return () => {
+      webglp.lines = []; ///???????????? add removeAllLines to webgl-plot
+    };
+  }, [lineNum]);
 
   useEffect(() => {
     let id = 0;
@@ -59,13 +67,16 @@ export default function SinApp(): JSX.Element {
       const noiseA = noiseAmp == undefined ? 0.1 : noiseAmp;
       const noiseP = noisePhase == undefined ? 0 : noisePhase;
 
-      const phase = noiseP * 2 * Math.PI * Math.random();
+      lines.forEach((line, index) => {
+        const phase = (noiseP / 5) * 2 * Math.PI * Math.random() + (index / lineNum) * Math.PI * 2;
 
-      for (let i = 0; i < line.numPoints; i++) {
-        const ySin = Math.sin(Math.PI * i * freqA * Math.PI * 2 + phase);
-        const yNoise = Math.random() - 0.5;
-        line.setY(i, ySin * amp + yNoise * noiseA);
-      }
+        for (let i = 0; i < line.numPoints; i++) {
+          const ySin = Math.sin(Math.PI * i * freqA * Math.PI * 2 + phase);
+          const yNoise = Math.random() - 0.5;
+          line.setY(i, ySin * amp + yNoise * noiseA);
+        }
+      });
+
       id = requestAnimationFrame(renderPlot);
       webglp.update();
     };
@@ -75,7 +86,7 @@ export default function SinApp(): JSX.Element {
       renderPlot = (): void => {};
       cancelAnimationFrame(id);
     };
-  }, [freq, amp, noiseAmp, noisePhase]);
+  }, [freq, amp, noiseAmp, noisePhase, lineNum]);
 
   const canvasStyle = {
     width: "100%",
@@ -88,43 +99,61 @@ export default function SinApp(): JSX.Element {
 
     setSlider(newSlider as number);
     switch (true) {
-      case param == "amp": {
+      case paramAF == "amp" && paramMN == "mean": {
         setAmp(slider / 100);
         break;
       }
-      case param == "freq": {
+      case paramAF == "freq" && paramMN == "mean": {
         setFreq(slider / 10);
         break;
       }
-      case param == "noise": {
+      case paramAF == "amp" && paramMN == "noise": {
         setNoiseAmp(slider / 100);
         break;
       }
+      case paramAF == "freq" && paramMN == "noise": {
+        setNoisePhase(slider / 100);
+        break;
+      }
+      case paramAF != null && paramMN == null: {
+        setParamMN("mean");
+        break;
+      }
+      case paramLO == "lines": {
+        setLineNum(slider > 0 ? Math.round(slider) : 1);
+        break;
+      }
     }
   };
 
-  const [param, setParam] = React.useState<string | null>("amp");
-
-  const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
-    setParam(newParam);
-  };
+  const [paramAF, setParamAF] = React.useState<string | null>("amp");
+  const [paramMN, setParamMN] = React.useState<string | null>("mean");
+  const [paramLO, setParamLO] = React.useState<string | null>(null);
 
   useEffect(() => {
     switch (true) {
-      case param == "amp": {
+      case paramAF == "amp" && paramMN == "mean": {
         setSlider(amp * 100);
         break;
       }
-      case param == "freq": {
+      case paramAF == "freq" && paramMN == "mean": {
         setSlider(freq * 10);
         break;
       }
-      case param == "noise": {
+      case paramAF == "amp" && paramMN == "noise": {
         setSlider(noiseAmp * 100);
         break;
       }
+      case paramAF == "freq" && paramMN == "noise": {
+        setSlider(noisePhase * 100);
+        break;
+      }
+      case paramLO == "lines": {
+        setSlider(lineNum);
+        break;
+      }
     }
-  }, [param]);
+  }, [paramAF, paramMN, paramLO]);
 
   const paramStyle = {
     fontSize: "1.5em",
@@ -149,10 +178,15 @@ export default function SinApp(): JSX.Element {
           <canvas style={canvasStyle} ref={canvasMain}></canvas>
 
           <ToggleButtonGroup
-            style={{ textTransform: "none" }}
-            value={param}
+            style={{ textTransform: "none", marginRight: "1em" }}
+            value={paramAF}
             exclusive
-            onChange={handleParam}
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+              if (newParam) {
+                setParamAF(newParam);
+                setParamLO(null);
+              }
+            }}
             aria-label="text formatting">
             <ToggleButton value="amp" aria-label="bold">
               <span style={paramStyle}>Amp</span>
@@ -160,14 +194,51 @@ export default function SinApp(): JSX.Element {
             <ToggleButton value="freq" aria-label="freq">
               <span style={paramStyle}>Freq</span>
             </ToggleButton>
-            <ToggleButton value="noise" aria-label="noise">
+          </ToggleButtonGroup>
+
+          <ToggleButtonGroup
+            style={{ textTransform: "none", marginRight: "1em" }}
+            value={paramMN}
+            exclusive
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+              if (newParam) {
+                setParamMN(newParam);
+                setParamLO(null);
+              }
+            }}
+            aria-label="text formatting">
+            <ToggleButton value="mean" aria-label="bold">
+              <span style={paramStyle}>Mean</span>
+            </ToggleButton>
+            <ToggleButton value="noise" aria-label="freq">
               <span style={paramStyle}>Noise</span>
             </ToggleButton>
           </ToggleButtonGroup>
 
-          <Chip style={paramStyle} avatar={<Avatar>A</Avatar>} label={amp.toPrecision(2)} />
+          <ToggleButtonGroup
+            style={{ textTransform: "none" }}
+            value={paramLO}
+            exclusive
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+              if (newParam) {
+                setParamAF(null);
+                setParamMN(null);
+                setParamLO(newParam);
+              }
+            }}
+            aria-label="text formatting">
+            <ToggleButton value="lines" aria-label="bold">
+              <span style={paramStyle}>Lines</span>
+            </ToggleButton>
+            <ToggleButton value="offset" aria-label="freq">
+              <span style={paramStyle}>Offset</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+
+          <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={amp.toPrecision(2)} />
           <Chip style={paramStyle} avatar={<Avatar>F</Avatar>} label={freq.toPrecision(2)} />
-          <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={noiseAmp.toPrecision(2)} />
+          <Chip style={paramStyle} avatar={<Avatar>AN</Avatar>} label={noiseAmp.toPrecision(2)} />
+          <Chip style={paramStyle} avatar={<Avatar>FN</Avatar>} label={noiseAmp.toPrecision(2)} />
 
           <CustomSlider
             min={0}
