@@ -46,21 +46,32 @@ export default function SinApp(): JSX.Element {
       webglp = new WebGlPlot(canvasMain.current);
 
       numX = Math.round(canvasMain.current.getBoundingClientRect().width);
+
+      //temporary addition
+      const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
+      lines = [new WebglLine(color, numX)];
+      lines[0].lineSpaceX(-1, 2 / numX);
+      webglp.addLine(lines[0]);
     }
   }, [canvasMain]);
 
   useEffect(() => {
-    lines = [];
-    for (let i = 0; i < lineNum; i++) {
-      const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-      const line = new WebglLine(color, numX);
-      line.lineSpaceX(-1, 2 / numX);
-      lines.push(line);
-      webglp.addLine(line);
+    if (lines) {
+      if (lineNum < lines.length) {
+        while (lineNum < lines.length) {
+          webglp.popLine();
+          lines.pop();
+        }
+      } else {
+        while (lineNum > lines.length) {
+          const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 0.8);
+          const line = new WebglLine(color, numX);
+          line.lineSpaceX(-1, 2 / numX);
+          lines.push(line);
+          webglp.addLine(line);
+        }
+      }
     }
-    return () => {
-      webglp.lines = []; ///???????????? add removeAllLines to webgl-plot
-    };
   }, [lineNum]);
 
   useEffect(() => {

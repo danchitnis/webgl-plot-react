@@ -36,9 +36,7 @@ export const WorkerApi = {
     wglp = new WebGLplot(canvas, true);
 
     const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-
     lines = [new WebglLine(color, numX)];
-
     lines[0].lineSpaceX(-1, 2 / numX);
     wglp.addLine(lines[0]);
 
@@ -72,16 +70,23 @@ export const WorkerApi = {
   },
 
   setLineNum: async (p_lineNum: number) => {
-    wglp.lines = [];
-    lines = [];
-    lineNum = p_lineNum;
+    //lineNum = p_lineNum;
 
-    for (let i = 0; i < lineNum; i++) {
-      const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-      const line = new WebglLine(color, numX);
-      line.lineSpaceX(-1, 2 / numX);
-      lines.push(line);
-      wglp.addLine(line);
+    if (p_lineNum < lineNum) {
+      while (p_lineNum < lineNum) {
+        wglp.popLine();
+        lines.pop();
+        lineNum--;
+      }
+    } else {
+      while (p_lineNum > lineNum) {
+        const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 0.8);
+        const line = new WebglLine(color, numX);
+        line.lineSpaceX(-1, 2 / numX);
+        lines.push(line);
+        wglp.addLine(line);
+        lineNum++;
+      }
     }
   },
 
