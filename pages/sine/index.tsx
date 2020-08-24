@@ -26,10 +26,16 @@ export default function SinApp(): JSX.Element {
   const [noiseAmp, setNoiseAmp] = useState(0.1);
   const [noisePhase, setNoisePhase] = useState(0.1);
   const [lineNum, setLineNum] = useState(1);
+  const [lineOffset, setLineOffset] = useState(0);
+
+  const [slider, setSlider] = React.useState<number>(50);
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
-  const [slider, setSlider] = React.useState<number>(50);
+  const canvasStyle = {
+    width: "100%",
+    height: "70vh",
+  };
 
   useEffect(() => {
     if (canvasMain.current) {
@@ -73,6 +79,7 @@ export default function SinApp(): JSX.Element {
         for (let i = 0; i < line.numPoints; i++) {
           const ySin = Math.sin(Math.PI * i * freqA * Math.PI * 2 + phase);
           const yNoise = Math.random() - 0.5;
+          line.offsetY = ((index - lineNum / 2) * lineOffset) / 10;
           line.setY(i, ySin * amp + yNoise * noiseA);
         }
       });
@@ -86,12 +93,7 @@ export default function SinApp(): JSX.Element {
       renderPlot = (): void => {};
       cancelAnimationFrame(id);
     };
-  }, [freq, amp, noiseAmp, noisePhase, lineNum]);
-
-  const canvasStyle = {
-    width: "100%",
-    height: "70vh",
-  };
+  }, [freq, amp, noiseAmp, noisePhase, lineNum, lineOffset]);
 
   const handleChange = (_event: React.SyntheticEvent, newSlider: unknown): void => {
     //console.log(event);
@@ -123,6 +125,10 @@ export default function SinApp(): JSX.Element {
         setLineNum(slider > 0 ? Math.round(slider) : 1);
         break;
       }
+      case paramLO == "offset": {
+        setLineOffset(slider / 100);
+        break;
+      }
     }
   };
 
@@ -152,6 +158,10 @@ export default function SinApp(): JSX.Element {
         setSlider(lineNum);
         break;
       }
+      case paramLO == "offset": {
+        setSlider(lineOffset * 100);
+        break;
+      }
     }
   }, [paramAF, paramMN, paramLO]);
 
@@ -174,9 +184,8 @@ export default function SinApp(): JSX.Element {
           fontSize: "20px",
           width: "100%",
         }}>
+        <canvas key="webglCanvas" style={canvasStyle} ref={canvasMain}></canvas>;
         <div style={{ width: "90%" }}>
-          <canvas style={canvasStyle} ref={canvasMain}></canvas>
-
           <ToggleButtonGroup
             style={{ textTransform: "none", marginRight: "1em" }}
             value={paramAF}
@@ -249,7 +258,6 @@ export default function SinApp(): JSX.Element {
             aria-labelledby="con-slider"
           />
         </div>
-
         <p>Move the slider!</p>
       </div>
     </Layout>
