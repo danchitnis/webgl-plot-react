@@ -21,13 +21,16 @@ export default function OffScreen(): JSX.Element {
 
   // for comlink
 
+  const [freq, setFreq] = useState(1);
   const [amp, setAmp] = useState(0.5);
-  const [freq, setFreq] = useState(0.1);
   const [noiseAmp, setNoiseAmp] = useState(0.1);
-
-  const canvasMain = useRef<HTMLCanvasElement>(null);
+  const [noisePhase, setNoisePhase] = useState(0.1);
+  const [lineNum, setLineNum] = useState(1);
+  const [lineOffset, setLineOffset] = useState(0);
 
   const [slider, setSlider] = React.useState<number>(50);
+
+  const canvasMain = useRef<HTMLCanvasElement>(null);
 
   //const comlinkWorkerRef = React.useRef<Worker>();
   //const comlinkWorkerApiRef = React.useRef<Comlink.Remote<WorkerApi>>();
@@ -51,8 +54,12 @@ export default function OffScreen(): JSX.Element {
   }, [canvasMain]);
 
   React.useEffect(() => {
-    comlinkWorkerApi.set(amp, freq, noiseAmp);
-  }, [amp, freq, noiseAmp]);
+    comlinkWorkerApi.set(amp, freq, noiseAmp, noisePhase, lineOffset);
+  }, [amp, freq, noiseAmp, noisePhase, lineNum, lineOffset]);
+
+  React.useEffect(() => {
+    comlinkWorkerApi.setLineNum(lineNum);
+  }, [lineNum]);
 
   const handleComlinkWork = async (canvas: OffscreenCanvas) => {
     await comlinkWorkerApi.start(Comlink.transfer(canvas, [canvas]));
@@ -64,43 +71,69 @@ export default function OffScreen(): JSX.Element {
 
     setSlider(newSlider as number);
     switch (true) {
-      case param == "amp": {
+      case paramAF == "amp" && paramMN == "mean": {
         setAmp(slider / 100);
         break;
       }
-      case param == "freq": {
-        setFreq(slider / 100);
+      case paramAF == "freq" && paramMN == "mean": {
+        setFreq(slider / 10);
         break;
       }
-      case param == "noise": {
+      case paramAF == "amp" && paramMN == "noise": {
         setNoiseAmp(slider / 100);
         break;
       }
+      case paramAF == "freq" && paramMN == "noise": {
+        setNoisePhase(slider / 100);
+        break;
+      }
+      case paramAF != null && paramMN == null: {
+        setParamMN("mean");
+        break;
+      }
+      case paramLO == "lines": {
+        setLineNum(slider > 0 ? Math.round(slider) : 1);
+        break;
+      }
+      case paramLO == "offset": {
+        setLineOffset(slider / 100);
+        break;
+      }
     }
   };
 
-  const [param, setParam] = React.useState<string | null>("amp");
-
-  const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
-    setParam(newParam);
-  };
+  const [paramAF, setParamAF] = React.useState<string | null>("amp");
+  const [paramMN, setParamMN] = React.useState<string | null>("mean");
+  const [paramLO, setParamLO] = React.useState<string | null>(null);
 
   useEffect(() => {
     switch (true) {
-      case param == "amp": {
+      case paramAF == "amp" && paramMN == "mean": {
         setSlider(amp * 100);
         break;
       }
-      case param == "freq": {
-        setSlider(freq * 100);
+      case paramAF == "freq" && paramMN == "mean": {
+        setSlider(freq * 10);
         break;
       }
-      case param == "noise": {
+      case paramAF == "amp" && paramMN == "noise": {
         setSlider(noiseAmp * 100);
         break;
       }
+      case paramAF == "freq" && paramMN == "noise": {
+        setSlider(noisePhase * 100);
+        break;
+      }
+      case paramLO == "lines": {
+        setSlider(lineNum);
+        break;
+      }
+      case paramLO == "offset": {
+        setSlider(lineOffset * 100);
+        break;
+      }
     }
-  }, [param]);
+  }, [paramAF, paramMN, paramLO]);
 
   const paramStyle = {
     fontSize: "1.5em",
@@ -130,10 +163,15 @@ export default function OffScreen(): JSX.Element {
           <canvas style={canvasStyle} ref={canvasMain}></canvas>
 
           <ToggleButtonGroup
-            style={{ textTransform: "none" }}
-            value={param}
+            style={{ textTransform: "none", marginRight: "1em" }}
+            value={paramAF}
             exclusive
-            onChange={handleParam}
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+              if (newParam) {
+                setParamAF(newParam);
+                setParamLO(null);
+              }
+            }}
             aria-label="text formatting">
             <ToggleButton value="amp" aria-label="bold">
               <span style={paramStyle}>Amp</span>
@@ -141,8 +179,44 @@ export default function OffScreen(): JSX.Element {
             <ToggleButton value="freq" aria-label="freq">
               <span style={paramStyle}>Freq</span>
             </ToggleButton>
-            <ToggleButton value="noise" aria-label="noise">
+          </ToggleButtonGroup>
+
+          <ToggleButtonGroup
+            style={{ textTransform: "none", marginRight: "1em" }}
+            value={paramMN}
+            exclusive
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+              if (newParam) {
+                setParamMN(newParam);
+                setParamLO(null);
+              }
+            }}
+            aria-label="text formatting">
+            <ToggleButton value="mean" aria-label="bold">
+              <span style={paramStyle}>Mean</span>
+            </ToggleButton>
+            <ToggleButton value="noise" aria-label="freq">
               <span style={paramStyle}>Noise</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+
+          <ToggleButtonGroup
+            style={{ textTransform: "none" }}
+            value={paramLO}
+            exclusive
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+              if (newParam) {
+                setParamAF(null);
+                setParamMN(null);
+                setParamLO(newParam);
+              }
+            }}
+            aria-label="text formatting">
+            <ToggleButton value="lines" aria-label="bold">
+              <span style={paramStyle}>Lines</span>
+            </ToggleButton>
+            <ToggleButton value="offset" aria-label="freq">
+              <span style={paramStyle}>Offset</span>
             </ToggleButton>
           </ToggleButtonGroup>
 
