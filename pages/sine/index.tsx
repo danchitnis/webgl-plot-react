@@ -252,7 +252,7 @@ export default function SinApp(): JSX.Element {
           fontSize: "20px",
           width: "100%",
         }}>
-        <canvas key="webglCanvas" style={canvasStyle} ref={canvasMain}></canvas>;
+        <canvas key="webglCanvas" style={canvasStyle} ref={canvasMain}></canvas>
         <div style={{ width: "90%" }}>
           <ToggleButtonGroup
             style={{ textTransform: "none", marginRight: "1em" }}

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "now": "vercel --prod"
+    "vercel": "vercel --prod"
   },
   "dependencies": {
     "@danchitnis/react-fps-stats": "^0.3.1",

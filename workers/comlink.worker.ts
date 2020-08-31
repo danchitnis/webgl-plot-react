@@ -65,8 +65,7 @@ export const WorkerApi = {
         }
       });
     };
-
-    newFrame();
+    requestAnimationFrame(newFrame);
   },
 
   setLineNum: async (p_lineNum: number) => {
