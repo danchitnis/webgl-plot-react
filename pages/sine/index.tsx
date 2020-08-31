@@ -182,7 +182,6 @@ export default function SinApp(): JSX.Element {
         break;
       }
       case paramLO == "lines": {
-        //setSliderConfig({ min: 0, max: lineNumberList.length - 1, step: 1 });
         setLineNum(lineNumberList[sliderValue]);
         break;
       }

@@ -14,7 +14,7 @@ export interface WorkerApi {
 }
 
 let wglp: WebGLplot;
-let lines: WebglLine[];
+//let lines: WebglLine[];
 
 let amp = 0.5;
 let freq = 0.1;
@@ -36,9 +36,9 @@ export const WorkerApi = {
     wglp = new WebGLplot(canvas, true);
 
     const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-    lines = [new WebglLine(color, numX)];
-    lines[0].lineSpaceX(-1, 2 / numX);
-    wglp.addLine(lines[0]);
+    const line = new WebglLine(color, numX);
+    line.lineSpaceX(-1, 2 / numX);
+    wglp.addLine(line);
 
     const newFrame = () => {
       update();
@@ -54,14 +54,14 @@ export const WorkerApi = {
       const noiseA = noiseAmp == undefined ? 0.1 : noiseAmp;
       const noiseP = noisePhase == undefined ? 0 : noisePhase;
 
-      lines.forEach((line, index) => {
+      wglp.lines.forEach((line, index) => {
         const phase = (noiseP / 5) * 2 * Math.PI * Math.random() + (index / lineNum) * Math.PI * 2;
 
         for (let i = 0; i < line.numPoints; i++) {
           const ySin = Math.sin(Math.PI * i * freqA * Math.PI * 2 + phase);
           const yNoise = Math.random() - 0.5;
           line.offsetY = ((index - lineNum / 2) * lineOffset) / 10;
-          line.setY(i, ySin * amp + yNoise * noiseA);
+          (line as WebglLine).setY(i, ySin * amp + yNoise * noiseA);
         }
       });
     };
@@ -75,7 +75,6 @@ export const WorkerApi = {
     if (p_lineNum < lineNum) {
       while (p_lineNum < lineNum) {
         wglp.popLine();
-        lines.pop();
         lineNum--;
       }
     } else {
@@ -83,7 +82,6 @@ export const WorkerApi = {
         const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 0.8);
         const line = new WebglLine(color, numX);
         line.lineSpaceX(-1, 2 / numX);
-        lines.push(line);
         wglp.addLine(line);
         lineNum++;
       }

@@ -16,6 +16,52 @@ import CustomSlider from "../../components/CustomSlider";
 let comlinkWorker: Worker;
 let comlinkWorkerApi: Comlink.Remote<WorkerApi>;
 
+const lineNumberList = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  20,
+  30,
+  40,
+  50,
+  60,
+  70,
+  80,
+  90,
+  100,
+  200,
+  300,
+  400,
+  500,
+  600,
+  700,
+  800,
+  900,
+  1000,
+  2000,
+  3000,
+  4000,
+  5000,
+  6000,
+  7000,
+  8000,
+  9000,
+  10000,
+];
+
+type SliderConfig = {
+  min: number;
+  max: number;
+  step: number;
+};
+
 export default function OffScreen(): JSX.Element {
   // for standard
 
@@ -28,7 +74,12 @@ export default function OffScreen(): JSX.Element {
   const [lineNum, setLineNum] = useState(1);
   const [lineOffset, setLineOffset] = useState(0);
 
-  const [slider, setSlider] = React.useState<number>(50);
+  const [sliderValue, setSliderValue] = React.useState<number>(50);
+  const [sliderConfig, setSliderConfig] = React.useState<SliderConfig>({
+    min: 0,
+    max: 100,
+    step: 0.1,
+  });
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
@@ -69,22 +120,22 @@ export default function OffScreen(): JSX.Element {
     //console.log(event);
     //console.log(newSlider);
 
-    setSlider(newSlider as number);
+    setSliderValue(newSlider as number);
     switch (true) {
       case paramAF == "amp" && paramMN == "mean": {
-        setAmp(slider / 100);
+        setAmp(sliderValue / 100);
         break;
       }
       case paramAF == "freq" && paramMN == "mean": {
-        setFreq(slider / 10);
+        setFreq(sliderValue / 10);
         break;
       }
       case paramAF == "amp" && paramMN == "noise": {
-        setNoiseAmp(slider / 100);
+        setNoiseAmp(sliderValue / 100);
         break;
       }
       case paramAF == "freq" && paramMN == "noise": {
-        setNoisePhase(slider / 100);
+        setNoisePhase(sliderValue / 100);
         break;
       }
       case paramAF != null && paramMN == null: {
@@ -92,11 +143,11 @@ export default function OffScreen(): JSX.Element {
         break;
       }
       case paramLO == "lines": {
-        setLineNum(slider > 0 ? Math.round(slider) : 1);
+        setLineNum(lineNumberList[sliderValue]);
         break;
       }
       case paramLO == "offset": {
-        setLineOffset(slider / 100);
+        setLineOffset(sliderValue / 100);
         break;
       }
     }
@@ -109,29 +160,37 @@ export default function OffScreen(): JSX.Element {
   useEffect(() => {
     switch (true) {
       case paramAF == "amp" && paramMN == "mean": {
-        setSlider(amp * 100);
+        setSliderValue(amp * 100);
         break;
       }
       case paramAF == "freq" && paramMN == "mean": {
-        setSlider(freq * 10);
+        setSliderValue(freq * 10);
         break;
       }
       case paramAF == "amp" && paramMN == "noise": {
-        setSlider(noiseAmp * 100);
+        setSliderValue(noiseAmp * 100);
         break;
       }
       case paramAF == "freq" && paramMN == "noise": {
-        setSlider(noisePhase * 100);
+        setSliderValue(noisePhase * 100);
         break;
       }
       case paramLO == "lines": {
-        setSlider(lineNum);
+        setSliderValue(lineNumberList.findIndex((element) => element === lineNum));
         break;
       }
       case paramLO == "offset": {
-        setSlider(lineOffset * 100);
+        setSliderValue(lineOffset * 100);
         break;
       }
+    }
+  }, [paramAF, paramMN, paramLO]);
+
+  useEffect(() => {
+    if (paramLO == "lines") {
+      setSliderConfig({ min: 0, max: lineNumberList.length - 1, step: 1 });
+    } else {
+      setSliderConfig({ min: 0, max: 100, step: 0.1 });
     }
   }, [paramAF, paramMN, paramLO]);
 
@@ -220,15 +279,18 @@ export default function OffScreen(): JSX.Element {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          <Chip style={paramStyle} avatar={<Avatar>A</Avatar>} label={amp.toPrecision(2)} />
-          <Chip style={paramStyle} avatar={<Avatar>F</Avatar>} label={freq.toPrecision(2)} />
-          <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={noiseAmp.toPrecision(2)} />
+          <Chip
+            style={paramStyle}
+            avatar={<Avatar>P</Avatar>}
+            label={`${amp.toPrecision(2)}, ${freq.toPrecision(2)}`}
+          />
+          <Chip style={paramStyle} avatar={<Avatar>L</Avatar>} label={lineNum} />
 
           <CustomSlider
-            min={0}
-            max={100}
-            step={0.1}
-            value={slider}
+            min={sliderConfig.min}
+            max={sliderConfig.max}
+            step={sliderConfig.step}
+            value={sliderValue}
             onChange={handleChange}
             aria-labelledby="con-slider"
           />
