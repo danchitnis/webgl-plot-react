@@ -102,11 +102,11 @@ export default function OffScreen(): JSX.Element {
     return () => {
       comlinkWorker.terminate();
     };
-  }, [canvasMain]);
+  }, []);
 
   React.useEffect(() => {
     comlinkWorkerApi.set(amp, freq, noiseAmp, noisePhase, lineOffset);
-  }, [amp, freq, noiseAmp, noisePhase, lineNum, lineOffset]);
+  }, [amp, freq, noiseAmp, noisePhase, lineOffset]);
 
   React.useEffect(() => {
     comlinkWorkerApi.setLineNum(lineNum);
