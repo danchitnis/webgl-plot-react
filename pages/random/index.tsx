@@ -14,7 +14,7 @@ import FPSStat from "@danchitnis/react-fps-stats";
 import Layout from "../../components/Layout";
 
 let webglp: WebGlPlot;
-let lines: WebglLine[];
+//let lines: WebglLine[];
 let numX = 1;
 
 export default function WebglAppRandom(): JSX.Element {
@@ -22,7 +22,7 @@ export default function WebglAppRandom(): JSX.Element {
   const [numLines, setNumLines] = useState(1);
   const [yScale, setYScale] = useState(1);
 
-  const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
+  const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
@@ -32,31 +32,23 @@ export default function WebglAppRandom(): JSX.Element {
       canvasMain.current.width = canvasMain.current.clientWidth * devicePixelRatio;
       canvasMain.current.height = canvasMain.current.clientHeight * devicePixelRatio;
 
-      webglp = new WebGlPlot(canvasMain.current);
+      webglp = new WebGlPlot(canvasMain.current, { powerPerformance: "high-performance" });
       numX = Math.round(canvasMain.current.getBoundingClientRect().width);
     }
   }, [canvasMain]);
 
   useEffect(() => {
-    webglp.lines = [];
-    lines = [];
+    //webglp.lines = [];
+    webglp.removeAllLines();
+    //lines = [];
 
     const numLinesActual = numList[numLines];
 
     for (let i = 0; i < numLinesActual; i++) {
       const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-      lines.push(new WebglLine(color, numX));
-    }
-
-    lines.forEach((line) => {
+      const line = new WebglLine(color, numX);
+      line.lineSpaceX(-1, 2 / numX);
       webglp.addLine(line);
-    });
-
-    for (let i = 0; i < numX; i++) {
-      // set x to -num/2:1:+num/2
-      lines.forEach((line) => {
-        line.lineSpaceX(-1, 2 / numX);
-      });
     }
   }, [numLines]);
 
@@ -73,9 +65,9 @@ export default function WebglAppRandom(): JSX.Element {
     };
 
     let renderPlot = (): void => {
-      lines.forEach((line) => {
-        const yArray = randomWalk(line.getY(numX - 1), shiftSize);
-        line.shiftAdd(yArray);
+      webglp.lines.forEach((line) => {
+        const yArray = randomWalk((line as WebglLine).getY(numX - 1), shiftSize);
+        (line as WebglLine).shiftAdd(yArray);
       });
       id = requestAnimationFrame(renderPlot);
       webglp.update();

@@ -11,7 +11,7 @@ import WebGlPlot, { WebglStep, ColorRGBA } from "webgl-plot";
 import Layout from "../../components/Layout";
 
 let webglp: WebGlPlot;
-let line: WebglStep;
+//let line: WebglStep;
 
 //const randXSize = 10;
 
@@ -65,7 +65,7 @@ export default function WebglAppHistogram(): JSX.Element {
     }
 
     const color = new ColorRGBA(1, 1, 0, 1);
-    line = new WebglStep(color, numBins);
+    const line = new WebglStep(color, numBins);
     // line.linespaceX(-1, 2 / numBins);
     // instead of line above we are applying offsetX and scaleX
     line.lineSpaceX(0, 1);
@@ -130,7 +130,7 @@ export default function WebglAppHistogram(): JSX.Element {
       // Normalize ?
       for (let i = 0; i < ybins.length; i++) {
         const y = (ybins[i] / randXSize) * numBins;
-        line.setY(i, y * 0.02);
+        (webglp.lines[0] as WebglStep).setY(i, y * 0.02);
       }
 
       id = requestAnimationFrame(renderPlot);

@@ -83,6 +83,8 @@ export default function SinApp(): JSX.Element {
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
+  //const [webglp, setWebglp] = useState<WebGlPlot>();
+
   const canvasStyle = {
     width: "100%",
     height: "70vh",
@@ -94,20 +96,36 @@ export default function SinApp(): JSX.Element {
       canvasMain.current.width = canvasMain.current.clientWidth * devicePixelRatio;
       canvasMain.current.height = canvasMain.current.clientHeight * devicePixelRatio;
 
-      webglp = new WebGlPlot(canvasMain.current);
+      console.log(webglp);
+      webglp = new WebGlPlot(canvasMain.current, {
+        debug: true,
+        powerPerformance: "high-performance",
+      });
+      //setWebglp(new WebGlPlot(canvasMain.current));
 
       numX = Math.round(canvasMain.current.getBoundingClientRect().width);
 
-      //temporary addition
-      const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-      const line = new WebglLine(color, numX);
-      line.lineSpaceX(-1, 2 / numX);
-      webglp.addLine(line);
+      return () => {
+        console.log("😬");
+        //webglp?.delete();
+      };
     }
   }, [canvasMain]);
 
+  /*useEffect(() => {
+    //temporary addition
+    //webglp?.lines.pop();
+    //webglp?.webgl.clear();
+    const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
+    const line = new WebglLine(color, numX);
+    line.lineSpaceX(-1, 2 / numX);
+    //console.log(webglp);
+    webglp?.addLine(line);
+    webglp?.update();
+  }, [webglp]);*/
+
   useEffect(() => {
-    if (webglp.lines) {
+    if (webglp?.lines) {
       if (lineNum < webglp.lines.length) {
         while (lineNum < webglp.lines.length) {
           webglp.popLine();
@@ -133,7 +151,7 @@ export default function SinApp(): JSX.Element {
       const noiseA = noiseAmp == undefined ? 0.1 : noiseAmp;
       const noiseP = noisePhase == undefined ? 0 : noisePhase;
 
-      webglp.lines.forEach((line, index) => {
+      webglp?.lines.forEach((line, index) => {
         const phase = (noiseP / 5) * 2 * Math.PI * Math.random() + (index / lineNum) * Math.PI * 2;
 
         for (let i = 0; i < line.numPoints; i++) {
@@ -145,7 +163,7 @@ export default function SinApp(): JSX.Element {
       });
 
       id = requestAnimationFrame(renderPlot);
-      webglp.update();
+      webglp?.update();
     };
     id = requestAnimationFrame(renderPlot);
 
@@ -153,7 +171,7 @@ export default function SinApp(): JSX.Element {
       renderPlot = (): void => {};
       cancelAnimationFrame(id);
     };
-  }, [freq, amp, noiseAmp, noisePhase, lineNum, lineOffset]);
+  }, [webglp, freq, amp, noiseAmp, noisePhase, lineNum, lineOffset]);
 
   const handleChange = (_event: React.SyntheticEvent, newSlider: unknown): void => {
     //console.log(event);
@@ -252,7 +270,7 @@ export default function SinApp(): JSX.Element {
           fontSize: "20px",
           width: "100%",
         }}>
-        <canvas key="webglCanvas" style={canvasStyle} ref={canvasMain}></canvas>
+        <canvas key="WebglCanvas" style={canvasStyle} ref={canvasMain}></canvas>
         <div style={{ width: "90%" }}>
           <ToggleButtonGroup
             style={{ textTransform: "none", marginRight: "1em" }}

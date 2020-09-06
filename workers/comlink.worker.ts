@@ -33,7 +33,7 @@ export const WorkerApi = {
 
     numX = canvas.width;
 
-    wglp = new WebGLplot(canvas, true);
+    wglp = new WebGLplot(canvas, { debug: true, powerPerformance: "high-performance" });
 
     const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
     const line = new WebglLine(color, numX);
