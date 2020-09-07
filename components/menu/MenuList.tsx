@@ -20,7 +20,7 @@ export const MenuList = [
     href: "/sine",
   },
   { id: "random", text: "Random", icon: "", href: "/random" },
-  { id: "static", text: "Static", icon: "", href: "/random" },
+  { id: "static", text: "Static", icon: "", href: "/static" },
   { id: "histogram", text: "Histogram", icon: "", href: "/histogram" },
   { id: "radar", text: "Radar", icon: "", href: "/histogram" },
   { id: "offScreen", text: "OffScreen", icon: "", href: "/offScreen" },
