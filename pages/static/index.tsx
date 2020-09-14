@@ -59,7 +59,22 @@ export default function WebglAppRandom(): JSX.Element {
         requestAnimationFrame(newFrame);
       };
       requestAnimationFrame(newFrame);
+
+      //bug fix see https://github.com/facebook/react/issues/14856#issuecomment-586781399
+      canvasMain.current.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+        },
+        { passive: false }
+      );
     }
+    ////bug fix see https://github.com/facebook/react/issues/14856#issuecomment-586781399
+    return () => {
+      canvasMain.current?.removeEventListener("wheel", (e) => {
+        e.preventDefault();
+      });
+    };
   }, [canvasMain]);
 
   useEffect(() => {
@@ -113,10 +128,12 @@ export default function WebglAppRandom(): JSX.Element {
 
   const mouseWheel = (e: React.WheelEvent) => {
     //e.preventDefault();
+    const eOffset = (e.target as HTMLCanvasElement).getBoundingClientRect().x;
+    const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
 
-    const width = canvasMain.current == undefined ? 1 : canvasMain.current.width;
+    //const width = canvasMain.current == undefined ? 1 : canvasMain.current.width;
 
-    const cursorOffsetX = (-2 * (e.clientX * devicePixelRatio - width / 2)) / width;
+    const cursorOffsetX = (-2 * (e.clientX - eOffset - width / 2)) / width;
     let scale = wheelZoom.scale;
     let offset = wheelZoom.offset;
 
@@ -139,73 +156,78 @@ export default function WebglAppRandom(): JSX.Element {
     }
     console.log(wheelZoom);
     setWheelZoom({ scale: scale, offset: offset });
-    webglp.update();
+    //webglp.update();
   };
 
   const mouseDown = (e: React.MouseEvent) => {
-    console.log(e.clientX);
-    if (canvasMain.current) {
-      if (e.button == 0) {
-        canvasMain.current.style.cursor = "pointer";
-        const width = canvasMain.current.width;
-        const cursorDownX = (2 * (e.clientX * devicePixelRatio - width / 2)) / width;
-        setZoom({ started: true, cursorDownX: cursorDownX, cursorOffsetX: 0 });
-        //Rect.visible = true;
-      }
-      if (e.button == 2) {
-        canvasMain.current.style.cursor = "grabbing";
-        const dragInitialX = e.clientX * devicePixelRatio;
-        const dragOffsetOld = webglp.gOffsetX;
-        setDrag({ started: true, dragInitialX: dragInitialX, dragOffsetOld: dragOffsetOld });
-      }
+    e.preventDefault();
+    const eOffset = (e.target as HTMLCanvasElement).getBoundingClientRect().x;
+    console.log(e.clientX - eOffset); //offset from the edge of the element
+    //const cStyle = (e.target as HTMLCanvasElement).style;
+    if (e.button == 0) {
+      (e.target as HTMLCanvasElement).style.cursor = "pointer";
+      const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
+      const cursorDownX = (2 * (e.clientX - eOffset - width / 2)) / width;
+      setZoom({ started: true, cursorDownX: cursorDownX, cursorOffsetX: 0 });
+      //RectZ.visible = true;
     }
+    if (e.button == 2) {
+      (e.target as HTMLCanvasElement).style.cursor = "grabbing";
+      const dragInitialX = (e.clientX - eOffset) * devicePixelRatio;
+      const dragOffsetOld = webglp.gOffsetX;
+      setDrag({ started: true, dragInitialX: dragInitialX, dragOffsetOld: dragOffsetOld });
+    }
+
     //const canvas = canvasMain.current;
   };
 
   const mouseMove = (e: React.MouseEvent) => {
+    const eOffset = (e.target as HTMLCanvasElement).getBoundingClientRect().x;
     if (zoom.started) {
-      if (canvasMain.current) {
-        const width = canvasMain.current.width;
-        const cursorOffsetX = (2 * (e.clientX * devicePixelRatio - width / 2)) / width;
-        setZoom({ started: true, cursorDownX: zoom.cursorDownX, cursorOffsetX: cursorOffsetX });
-        RectZ.xy = new Float32Array([
-          (zoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
-          -1,
-          (zoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
-          1,
-          (cursorOffsetX - webglp.gOffsetX) / webglp.gScaleX,
-          1,
-          (cursorOffsetX - webglp.gOffsetX) / webglp.gScaleX,
-          -1,
-        ]);
-        RectZ.visible = true;
-      }
+      const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
+      const cursorOffsetX = (2 * (e.clientX - eOffset - width / 2)) / width;
+      setZoom({ started: true, cursorDownX: zoom.cursorDownX, cursorOffsetX: cursorOffsetX });
+      RectZ.xy = new Float32Array([
+        (zoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
+        -1,
+        (zoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
+        1,
+        (cursorOffsetX - webglp.gOffsetX) / webglp.gScaleX,
+        1,
+        (cursorOffsetX - webglp.gOffsetX) / webglp.gScaleX,
+        -1,
+      ]);
+      RectZ.visible = true;
     }
 
     if (drag.started) {
-      const moveX = e.clientX * devicePixelRatio - drag.dragInitialX;
+      const moveX = (e.clientX - eOffset) * devicePixelRatio - drag.dragInitialX;
       const offsetX = (webglp.gScaleY * moveX) / 1000;
       webglp.gOffsetX = offsetX + drag.dragOffsetOld;
     }
   };
 
   const mouseUp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const eOffset = (e.target as HTMLCanvasElement).getBoundingClientRect().x;
     if (zoom.started) {
-      if (canvasMain.current) {
-        const width = canvasMain.current.width;
-        const cursorUpX = (2 * (e.clientX * devicePixelRatio - width / 2)) / width;
-        const zoomFactor = Math.abs(cursorUpX - zoom.cursorDownX) / (2 * webglp.gScaleX);
-        const offsetFactor =
-          (zoom.cursorDownX + cursorUpX - 2 * webglp.gOffsetX) / (2 * webglp.gScaleX);
+      //const width = canvasMain.current.width;
+      const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
+      const cursorUpX = (2 * (e.clientX - eOffset - width / 2)) / width;
+      const zoomFactor = Math.abs(cursorUpX - zoom.cursorDownX) / (2 * webglp.gScaleX);
+      const offsetFactor =
+        (zoom.cursorDownX + cursorUpX - 2 * webglp.gOffsetX) / (2 * webglp.gScaleX);
 
-        if (zoomFactor > 0) {
-          webglp.gScaleX = 1 / zoomFactor;
-          webglp.gOffsetX = -offsetFactor / zoomFactor;
-        }
+      if (zoomFactor > 0) {
+        webglp.gScaleX = 1 / zoomFactor;
+        webglp.gOffsetX = -offsetFactor / zoomFactor;
       }
+
       setZoom({ started: false, cursorDownX: 0, cursorOffsetX: 0 });
     }
     setDrag({ started: false, dragInitialX: 0, dragOffsetOld: 0 });
+    (e.target as HTMLCanvasElement).style.cursor = "grab";
+    RectZ.visible = false;
   };
 
   const doubleClick = (e: React.MouseEvent) => {

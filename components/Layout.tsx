@@ -29,7 +29,7 @@ export default function Layout({
           type: prefersDarkMode ? "dark" : "light",
           //type: "light",
         },
-        overrides: {},
+        //overrides: {},
         typography: {
           body1: {
             fontSize: "1.2rem",
