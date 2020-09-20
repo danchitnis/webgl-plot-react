@@ -13,7 +13,7 @@ import Layout from "../../components/Layout";
 
 let webglp: WebGlPlot;
 //let lines: WebglLine[];
-let numX = 10000;
+//let numX = 1000;
 
 const RectZ = new WebglLine(new ColorRGBA(1, 1, 1, 1), 4);
 
@@ -34,15 +34,37 @@ type Zoom = {
   cursorOffsetX: number;
 };
 
+type ZoomStatus = {
+  scale: number;
+  offset: number;
+};
+
 export default function WebglAppRandom(): JSX.Element {
-  const [shiftSize, setShiftSize] = useState(1);
+  const [numX, setNumX] = useState(3);
   const [numLines, setNumLines] = useState(1);
   const [wheelZoom, setWheelZoom] = useState<WheelZoom>({ scale: 1, offset: 0 });
+
+  const [zoomStatus, setZoomStatus] = useState<ZoomStatus>({ scale: 1, offset: 0 });
 
   const [zoom, setZoom] = useState<Zoom>({ started: false, cursorDownX: 0, cursorOffsetX: 0 });
   const [drag, setDrag] = useState<Drag>({ started: false, dragInitialX: 0, dragOffsetOld: 0 });
 
   const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
+  const numXList = [
+    100,
+    200,
+    500,
+    1000,
+    2000,
+    5000,
+    10000,
+    20000,
+    50000,
+    100000,
+    200000,
+    500000,
+    1000000,
+  ];
 
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
@@ -78,6 +100,10 @@ export default function WebglAppRandom(): JSX.Element {
   }, [canvasMain]);
 
   useEffect(() => {
+    setZoomStatus({ scale: webglp.gScaleX, offset: webglp.gOffsetX / webglp.gScaleX });
+  }, [drag, zoom, wheelZoom]);
+
+  useEffect(() => {
     webglp.removeAllLines();
     webglp.addLine(RectZ);
 
@@ -85,8 +111,8 @@ export default function WebglAppRandom(): JSX.Element {
 
     for (let i = 0; i < numLinesActual; i++) {
       const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
-      const line = new WebglLine(color, numX);
-      line.lineSpaceX(-1, 2 / numX);
+      const line = new WebglLine(color, numXList[numX]);
+      line.lineSpaceX(-1, 2 / numXList[numX]);
       webglp.addLine(line);
     }
 
@@ -120,7 +146,7 @@ export default function WebglAppRandom(): JSX.Element {
     //wglp.viewport(0, 0, 1000, 1000);
     webglp.gScaleX = 1;
     webglp.update();
-  }, [numLines]);
+  }, [numLines, numX]);
 
   /**
    * Canvas events
@@ -183,8 +209,8 @@ export default function WebglAppRandom(): JSX.Element {
 
   const mouseMove = (e: React.MouseEvent) => {
     const eOffset = (e.target as HTMLCanvasElement).getBoundingClientRect().x;
+    const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
     if (zoom.started) {
-      const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
       const cursorOffsetX = (2 * (e.clientX - eOffset - width / 2)) / width;
       setZoom({ started: true, cursorDownX: zoom.cursorDownX, cursorOffsetX: cursorOffsetX });
       RectZ.xy = new Float32Array([
@@ -202,7 +228,7 @@ export default function WebglAppRandom(): JSX.Element {
 
     if (drag.started) {
       const moveX = (e.clientX - eOffset) * devicePixelRatio - drag.dragInitialX;
-      const offsetX = (webglp.gScaleY * moveX) / 1000;
+      const offsetX = (webglp.gScaleY * moveX) / width;
       webglp.gOffsetX = offsetX + drag.dragOffsetOld;
     }
   };
@@ -255,7 +281,7 @@ export default function WebglAppRandom(): JSX.Element {
   const onDrag = (_event: any, newSlider: number | number[]): void => {
     setSlider(newSlider as number);
     //slider = newSlider as number;
-    setShiftSize(newSlider as number);
+    setNumX(newSlider as number);
   };
 
   const onUpdate = (_event: any, newSlider: number | number[]): void => {
@@ -263,15 +289,15 @@ export default function WebglAppRandom(): JSX.Element {
     setNumLines(newSlider as number);
   };
 
-  const silderShift = (): void => {
+  const sliderNumX = (): void => {
     console.log("change");
     setSliderComp(
       <CustomSlider
-        key={Math.random()}
+        key={1}
         min={0}
-        max={10}
+        max={numXList.length}
         step={1}
-        defaultValue={shiftSize}
+        defaultValue={numX}
         onChange={onDrag}
       />
     );
@@ -281,7 +307,7 @@ export default function WebglAppRandom(): JSX.Element {
     console.log("change");
     setSliderComp(
       <CustomSlider
-        key={Math.random()}
+        key={2}
         min={0}
         max={numList.length - 1}
         step={1}
@@ -295,7 +321,7 @@ export default function WebglAppRandom(): JSX.Element {
 
   const [sliderComp, setSliderComp] = useState<JSX.Element>();
 
-  const [param, setParam] = React.useState<string | null>("shift");
+  const [param, setParam] = React.useState<string | null>("numX");
 
   const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
     setParam(newParam);
@@ -303,8 +329,8 @@ export default function WebglAppRandom(): JSX.Element {
 
   useEffect(() => {
     switch (true) {
-      case param == "shift": {
-        silderShift();
+      case param == "numX": {
+        sliderNumX();
         break;
       }
       case param == "numLine": {
@@ -356,16 +382,26 @@ export default function WebglAppRandom(): JSX.Element {
             exclusive
             onChange={handleParam}
             aria-label="text formatting">
-            <ToggleButton value="shift" aria-label="bold">
-              <span style={paramStyle}>Shift Size</span>
+            <ToggleButton value="numX" aria-label="bold">
+              <span style={paramStyle}>Data Size</span>
             </ToggleButton>
             <ToggleButton value="numLine" aria-label="freq">
               <span style={paramStyle}>Num Line</span>
             </ToggleButton>
           </ToggleButtonGroup>
 
-          <Chip style={paramStyle} avatar={<Avatar>S</Avatar>} label={shiftSize} />
+          <Chip style={paramStyle} avatar={<Avatar>D</Avatar>} label={numXList[numX]} />
           <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={numList[numLines]} />
+          <Chip
+            style={paramStyle}
+            avatar={<Avatar>Z</Avatar>}
+            label={`${zoomStatus.scale.toFixed(3)}`}
+          />
+          <Chip
+            style={paramStyle}
+            avatar={<Avatar>O</Avatar>}
+            label={`${zoomStatus.offset.toFixed(3)}`}
+          />
 
           {sliderComp}
         </div>
