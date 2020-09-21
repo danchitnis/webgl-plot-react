@@ -15,19 +15,15 @@ type Props = {
   title: string;
 };
 
-export default function Layout({
-  children,
-  title = "This is the default title",
-  id,
-}: Props): JSX.Element {
+export default function Layout({ children, title = "Examples", id }: Props): JSX.Element {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
 
   const theme = React.useMemo(
     () =>
       createMuiTheme({
         palette: {
-          type: prefersDarkMode ? "dark" : "light",
-          //type: "light",
+          //type: prefersDarkMode ? "dark" : "light",
+          type: "dark",
         },
         //overrides: {},
         typography: {

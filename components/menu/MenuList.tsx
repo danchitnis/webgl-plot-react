@@ -22,6 +22,6 @@ export const MenuList = [
   { id: "random", text: "Random", icon: "", href: "/random" },
   { id: "static", text: "Static", icon: "", href: "/static" },
   { id: "histogram", text: "Histogram", icon: "", href: "/histogram" },
-  { id: "radar", text: "Radar", icon: "", href: "/histogram" },
+  { id: "radar", text: "Radar", icon: "", href: "/radar" },
   { id: "offScreen", text: "OffScreen", icon: "", href: "/offScreen" },
 ] as MenuListType[];

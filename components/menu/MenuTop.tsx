@@ -5,7 +5,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import GitHubIcon from "@material-ui/icons/GitHub";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+//import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import NextLink from "next/link";
 import MuiLink from "@material-ui/core/Link";
@@ -71,17 +71,14 @@ export default function MenuTop({ menuList, pageId }: Props): JSX.Element {
               </ListItem>
             </MuiLink>
 
-            <NextLink href="/">
+            <NextLink href="/sine">
               <MuiLink
-                href="https://webgl-plot.now.sh/docs"
+                href="/sine"
                 variant="inherit"
                 color="inherit"
                 style={{ textDecoration: "none", alignSelf: "flex-end" }}>
                 <ListItem button>
                   <ListItemText primary="Examples" />
-                  <ListItemIcon>
-                    <ExpandMoreIcon style={styleIcon} />
-                  </ListItemIcon>
                 </ListItem>
               </MuiLink>
             </NextLink>
