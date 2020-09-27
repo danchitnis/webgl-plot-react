@@ -325,6 +325,24 @@ export default function WebglAppRandom(): JSX.Element {
     }
   }, [param]);
 
+  const LeftSide = (): JSX.Element => {
+    let left = 0;
+    if (webglp) {
+      left = (-1 * webglp.gOffsetX - 1) / webglp.gScaleX;
+    }
+    return <span>{`${left.toExponential(2)} + 0`}</span>;
+  };
+
+  const RightSide = (): JSX.Element => {
+    let left = 0;
+    let right = 0;
+    if (webglp) {
+      left = (-1 * webglp.gOffsetX - 1) / webglp.gScaleX;
+      right = 2 / webglp.gScaleX;
+    }
+    return <span>{`${left.toExponential(2)} + ${right.toExponential(2)}`}</span>;
+  };
+
   const paramStyle = {
     fontSize: "1.5em",
     marginLeft: "1em",
@@ -351,15 +369,32 @@ export default function WebglAppRandom(): JSX.Element {
           width: "100%",
         }}>
         <div style={mainDiv}>
-          <canvas
-            style={canvasStyle}
-            ref={canvasMain}
-            onWheel={mouseWheel}
-            onMouseDown={mouseDown}
-            onMouseMove={mouseMove}
-            onMouseUp={mouseUp}
-            onDoubleClick={doubleClick}
-            onContextMenu={contextMenu}></canvas>
+          <div>
+            <canvas
+              style={canvasStyle}
+              ref={canvasMain}
+              onWheel={mouseWheel}
+              onMouseDown={mouseDown}
+              onMouseMove={mouseMove}
+              onMouseUp={mouseUp}
+              onDoubleClick={doubleClick}
+              onContextMenu={contextMenu}></canvas>
+
+            <div
+              style={
+                {
+                  display: "flex",
+                  flexDirection: "row",
+                  width: "100%",
+                  justifyContent: "space-between",
+                } as React.CSSProperties
+              }>
+              <LeftSide />
+              <RightSide />
+            </div>
+          </div>
+
+          <br />
 
           <ToggleButtonGroup
             style={{ textTransform: "none" }}
@@ -385,7 +420,7 @@ export default function WebglAppRandom(): JSX.Element {
           <Chip
             style={paramStyle}
             avatar={<Avatar>O</Avatar>}
-            label={`${zoomStatus.offset.toFixed(3)}`}
+            label={`${zoomStatus.offset.toExponential(3)}`}
           />
 
           {param == "numX" ? <SliderNumX /> : <SliderNumLine />}
