@@ -275,37 +275,23 @@ export default function WebglAppRandom(): JSX.Element {
     width: "90%",
   };
 
-  const [slider, setSlider] = React.useState(1);
-  //let slider = 1;
-
-  const onDrag = (_event: any, newSlider: number | number[]): void => {
-    setSlider(newSlider as number);
-    //slider = newSlider as number;
-    setNumX(newSlider as number);
-  };
-
-  const onUpdate = (_event: any, newSlider: number | number[]): void => {
-    //setSlider(newSlider as number);
-    setNumLines(newSlider as number);
-  };
-
-  const sliderNumX = (): void => {
-    console.log("change");
-    setSliderComp(
+  const SliderNumX = (): JSX.Element => {
+    return (
       <CustomSlider
         key={1}
         min={0}
         max={numXList.length}
         step={1}
         defaultValue={numX}
-        onChange={onDrag}
+        onChangeCommitted={(_event: any, newSlider: number | number[]): void => {
+          setNumX(newSlider as number);
+        }}
       />
     );
   };
 
-  const sliderNumLine = (): void => {
-    console.log("change");
-    setSliderComp(
+  const SliderNumLine = (): JSX.Element => {
+    return (
       <CustomSlider
         key={2}
         min={0}
@@ -313,28 +299,27 @@ export default function WebglAppRandom(): JSX.Element {
         step={1}
         defaultValue={numLines}
         //onChange={onDrag}
-        onChangeCommitted={onUpdate}
+        onChangeCommitted={(_event: any, newSlider: number | number[]): void => {
+          setNumLines(newSlider as number);
+        }}
       />
     );
-    console.log(slider);
   };
 
-  const [sliderComp, setSliderComp] = useState<JSX.Element>();
+  const [param, setParam] = React.useState<"numX" | "numLine">("numX");
 
-  const [param, setParam] = React.useState<string | null>("numX");
-
-  const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
+  const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: typeof param): void => {
     setParam(newParam);
   };
 
   useEffect(() => {
     switch (true) {
       case param == "numX": {
-        sliderNumX();
+        SliderNumX();
         break;
       }
       case param == "numLine": {
-        sliderNumLine();
+        SliderNumLine();
         break;
       }
     }
@@ -403,7 +388,7 @@ export default function WebglAppRandom(): JSX.Element {
             label={`${zoomStatus.offset.toFixed(3)}`}
           />
 
-          {sliderComp}
+          {param == "numX" ? <SliderNumX /> : <SliderNumLine />}
         </div>
 
         <p>

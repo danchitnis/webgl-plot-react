@@ -95,21 +95,7 @@ export default function WebglAppRandom(): JSX.Element {
     width: "90%",
   };
 
-  const [slider, setSlider] = React.useState(1);
-  //let slider = 1;
-
-  const onDrag = (_event: any, newSlider: number | number[]): void => {
-    setSlider(newSlider as number);
-    //slider = newSlider as number;
-    setShiftSize(newSlider as number);
-  };
-
-  const onUpdate = (_event: any, newSlider: number | number[]): void => {
-    //setSlider(newSlider as number);
-    setNumLines(newSlider as number);
-  };
-
-  const sliderShift = (): void => {
+  /*const sliderShift = (): void => {
     console.log("change");
     setSliderComp(
       <CustomSlider
@@ -118,7 +104,9 @@ export default function WebglAppRandom(): JSX.Element {
         max={10}
         step={1}
         defaultValue={shiftSize}
-        onChange={onDrag}
+        onChange={(_event: any, newSlider: number | number[]) => {
+          setShiftSize(newSlider as number);
+        }}
       />
     );
   };
@@ -133,10 +121,11 @@ export default function WebglAppRandom(): JSX.Element {
         step={1}
         defaultValue={numLines}
         //onChange={onDrag}
-        onChangeCommitted={onUpdate}
+        onChangeCommitted={(_event: any, newSlider: number | number[]) => {
+          setNumLines(newSlider as number);
+        }}
       />
     );
-    console.log(slider);
   };
 
   const sliderYScale = (): void => {
@@ -149,17 +138,25 @@ export default function WebglAppRandom(): JSX.Element {
         step={0.01}
         defaultValue={yScale}
         //onChange={onDrag}
-        onChange={onYScale}
+        onChange={(_event: any, newSlider: number | number[]): void => {
+          setYScale(newSlider as number);
+        }}
       />
     );
-    console.log(slider);
+  };*/
+
+  type SliderConfigType = {
+    min: number;
+    max: number;
+    step: number;
   };
 
-  const onYScale = (_event: any, newSlider: number | number[]): void => {
-    setYScale(newSlider as number);
-  };
-
-  const [sliderComp, setSliderComp] = useState<JSX.Element>();
+  const [sliderValue, setSliderValue] = useState(0);
+  const [sliderConfig, setSliderConfig] = useState<SliderConfigType>({
+    min: 0,
+    max: 1,
+    step: 0.1,
+  });
 
   const [param, setParam] = React.useState<"shift" | "numLine" | "yScale">("shift");
 
@@ -170,19 +167,52 @@ export default function WebglAppRandom(): JSX.Element {
   useEffect(() => {
     switch (true) {
       case param == "shift": {
-        sliderShift();
+        setSliderConfig({
+          min: 0,
+          max: 10,
+          step: 1,
+        });
+        setSliderValue(shiftSize);
         break;
       }
       case param == "numLine": {
-        sliderNumLine();
+        setSliderConfig({
+          min: 0,
+          max: numList.length - 1,
+          step: 1,
+        });
+        setSliderValue(numLines);
         break;
       }
       case param == "yScale": {
-        sliderYScale();
+        setSliderConfig({
+          min: 0,
+          max: 2,
+          step: 0.01,
+        });
+        setSliderValue(yScale);
         break;
       }
     }
   }, [param]);
+
+  const handleChange = (value: number) => {
+    setSliderValue(value);
+    switch (true) {
+      case param == "shift": {
+        setShiftSize(value);
+        break;
+      }
+      case param == "numLine": {
+        setNumLines(value);
+        break;
+      }
+      case param == "yScale": {
+        setYScale(value);
+        break;
+      }
+    }
+  };
 
   useEffect(() => {
     if (param == "shift") setDisplayValue(`${shiftSize}`);
@@ -245,7 +275,15 @@ export default function WebglAppRandom(): JSX.Element {
 
           <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={displayValue} />
 
-          {sliderComp}
+          <CustomSlider
+            min={sliderConfig.min}
+            max={sliderConfig.max}
+            step={sliderConfig.step}
+            value={sliderValue}
+            onChange={(_event: any, newSlider: number | number[]): void => {
+              handleChange(newSlider as number);
+            }}
+          />
         </div>
 
         <p>Move the slider!</p>
