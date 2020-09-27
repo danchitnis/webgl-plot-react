@@ -24,6 +24,8 @@ export default function WebglAppRandom(): JSX.Element {
 
   const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
 
+  const [displayValue, setDisplayValue] = useState("");
+
   const canvasMain = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export default function WebglAppRandom(): JSX.Element {
     setNumLines(newSlider as number);
   };
 
-  const silderShift = (): void => {
+  const sliderShift = (): void => {
     console.log("change");
     setSliderComp(
       <CustomSlider
@@ -159,16 +161,16 @@ export default function WebglAppRandom(): JSX.Element {
 
   const [sliderComp, setSliderComp] = useState<JSX.Element>();
 
-  const [param, setParam] = React.useState<string | null>("shift");
+  const [param, setParam] = React.useState<"shift" | "numLine" | "yScale">("shift");
 
-  const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: string | null): void => {
+  const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: typeof param): void => {
     setParam(newParam);
   };
 
   useEffect(() => {
     switch (true) {
       case param == "shift": {
-        silderShift();
+        sliderShift();
         break;
       }
       case param == "numLine": {
@@ -181,6 +183,16 @@ export default function WebglAppRandom(): JSX.Element {
       }
     }
   }, [param]);
+
+  useEffect(() => {
+    if (param == "shift") setDisplayValue(`${shiftSize}`);
+  }, [shiftSize, param]);
+  useEffect(() => {
+    if (param == "numLine") setDisplayValue(`${numLines}`);
+  }, [numLines, param]);
+  useEffect(() => {
+    if (param == "yScale") setDisplayValue(yScale.toFixed(2));
+  }, [yScale, param]);
 
   const paramStyle = {
     fontSize: "1.5em",
@@ -231,16 +243,12 @@ export default function WebglAppRandom(): JSX.Element {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          <Chip style={paramStyle} avatar={<Avatar>S</Avatar>} label={shiftSize} />
-          <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={numList[numLines]} />
-          <Chip style={paramStyle} avatar={<Avatar>Y</Avatar>} label={yScale} />
+          <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={displayValue} />
 
           {sliderComp}
         </div>
 
-        <p>
-          Edit <code>pages/hello.js</code> and save to reload.
-        </p>
+        <p>Move the slider!</p>
       </div>
     </Layout>
   );

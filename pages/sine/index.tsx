@@ -74,6 +74,8 @@ export default function SinApp(): JSX.Element {
   const [lineNum, setLineNum] = useState(1);
   const [lineOffset, setLineOffset] = useState(0);
 
+  const [displayValue, setDisplayValue] = useState("");
+
   const [sliderValue, setSliderValue] = React.useState<number>(50);
   const [sliderConfig, setSliderConfig] = React.useState<SliderConfig>({
     min: 0,
@@ -210,9 +212,9 @@ export default function SinApp(): JSX.Element {
     }
   };
 
-  const [paramAF, setParamAF] = React.useState<string | null>("amp");
-  const [paramMN, setParamMN] = React.useState<string | null>("mean");
-  const [paramLO, setParamLO] = React.useState<string | null>(null);
+  const [paramAF, setParamAF] = React.useState<"amp" | "freq" | null>("amp");
+  const [paramMN, setParamMN] = React.useState<"mean" | "noise" | null>("mean");
+  const [paramLO, setParamLO] = React.useState<"lines" | "offset" | null>(null);
 
   useEffect(() => {
     switch (true) {
@@ -251,6 +253,25 @@ export default function SinApp(): JSX.Element {
     }
   }, [paramAF, paramMN, paramLO]);
 
+  useEffect(() => {
+    if (paramAF == "amp" && paramMN == "mean") setDisplayValue(amp.toFixed(2));
+  }, [amp, paramAF, paramMN]);
+  useEffect(() => {
+    if (paramAF == "freq" && paramMN == "mean") setDisplayValue(freq.toFixed(2));
+  }, [freq, paramAF, paramMN]);
+  useEffect(() => {
+    if (paramAF == "amp" && paramMN == "noise") setDisplayValue(noiseAmp.toFixed(2));
+  }, [noiseAmp, paramAF, paramMN]);
+  useEffect(() => {
+    if (paramAF == "freq" && paramMN == "noise") setDisplayValue(noisePhase.toFixed(2));
+  }, [noisePhase, paramAF, paramMN]);
+  useEffect(() => {
+    if (paramLO == "lines") setDisplayValue(`${lineNum}`);
+  }, [lineNum, paramLO]);
+  useEffect(() => {
+    if (paramLO == "offset") setDisplayValue(`${lineOffset.toFixed(3)}`);
+  }, [lineOffset, paramLO]);
+
   const paramStyle = {
     fontSize: "1.5em",
     marginLeft: "1em",
@@ -276,9 +297,10 @@ export default function SinApp(): JSX.Element {
             style={{ textTransform: "none", marginRight: "1em" }}
             value={paramAF}
             exclusive
-            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: typeof paramAF) => {
               if (newParam) {
                 setParamAF(newParam);
+                if (paramMN == null) setParamMN("mean");
                 setParamLO(null);
               }
             }}
@@ -295,9 +317,10 @@ export default function SinApp(): JSX.Element {
             style={{ textTransform: "none", marginRight: "1em" }}
             value={paramMN}
             exclusive
-            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: typeof paramMN) => {
               if (newParam) {
                 setParamMN(newParam);
+                if (paramAF == null) setParamAF("amp");
                 setParamLO(null);
               }
             }}
@@ -314,7 +337,7 @@ export default function SinApp(): JSX.Element {
             style={{ textTransform: "none" }}
             value={paramLO}
             exclusive
-            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: string | null) => {
+            onChange={(_event: React.MouseEvent<HTMLElement>, newParam: typeof paramLO) => {
               if (newParam) {
                 setParamAF(null);
                 setParamMN(null);
@@ -330,12 +353,7 @@ export default function SinApp(): JSX.Element {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          <Chip
-            style={paramStyle}
-            avatar={<Avatar>P</Avatar>}
-            label={`${amp.toPrecision(2)}, ${freq.toPrecision(2)}`}
-          />
-          <Chip style={paramStyle} avatar={<Avatar>L</Avatar>} label={lineNum} />
+          <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={displayValue} />
 
           <CustomSlider
             min={sliderConfig.min}

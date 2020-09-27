@@ -407,7 +407,15 @@ export default function WebglAppRandom(): JSX.Element {
         </div>
 
         <p>
-          Edit <code>pages/hello.js</code> and save to reload.
+          With Mouse: turn the mouse wheel for zoom (zooming where the cursor is)
+          <br />
+          With Mouse: Right click and hold to pan
+          <br />
+          With Mouse: Left click hold & drag to zoom in the selected window
+          <br />
+          With Mouse: Double click to reset view With Touch: pinch & zoom - drag
+          <br />
+          Refresh the page for a new random data set
         </p>
       </div>
     </Layout>
