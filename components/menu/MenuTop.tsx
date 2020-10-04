@@ -88,7 +88,7 @@ export default function MenuTop({ menuList, pageId }: Props): JSX.Element {
         <div style={{ margin: "auto", marginRight: "1em" }}>
           <List>
             <MuiLink
-              href="https://github.com/danchitnis"
+              href="https://github.com/danchitnis/webgl-plot"
               target="_blank"
               rel="noopener"
               variant="inherit"

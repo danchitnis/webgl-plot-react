@@ -11,7 +11,6 @@ import WebGlPlot, { WebglStep, ColorRGBA } from "webgl-plot";
 import Layout from "../../components/Layout";
 
 let webglp: WebGlPlot;
-//let line: WebglStep;
 
 //const randXSize = 10;
 
@@ -23,9 +22,12 @@ let ybins: Float32Array;
 const xmin = 0;
 const xmax = 100;
 
-//const Xmin = 25;
-//const Xmax = 75;
-//const Xskew = 1;
+type SliderConfig = {
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number | number[]) => void;
+};
 
 export default function WebglAppHistogram(): JSX.Element {
   //states
@@ -33,6 +35,16 @@ export default function WebglAppHistogram(): JSX.Element {
   const [randXSize, setRandXSize] = useState(10);
   const [Xrange, setXrange] = useState<number[]>([25, 75]);
   const [Xskew, setXskew] = useState(1);
+
+  //const [displayValue, setDisplayValue] = useState("");
+
+  const [sliderValue, setSliderValue] = React.useState<number | number[]>(50);
+  const [sliderConfig, setSliderConfig] = React.useState<SliderConfig>({
+    min: 0,
+    max: 100,
+    step: 0.1,
+    onChange: () => {},
+  });
 
   //const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
 
@@ -53,6 +65,7 @@ export default function WebglAppHistogram(): JSX.Element {
   }, [canvasMain]);
 
   useEffect(() => {
+    webglp.removeAllLines();
     xbins = new Float32Array(numBins);
     ybins = new Float32Array(numBins);
 
@@ -146,102 +159,79 @@ export default function WebglAppHistogram(): JSX.Element {
     };
   }, [randXSize, numBins, Xrange, Xskew]);
 
-  const [sliderComp, setSliderComp] = useState<JSX.Element>();
+  const [param, setParam] = React.useState<"randXSize" | "numBins" | "Xrange" | "Xskew" | "yScale">(
+    "randXSize"
+  );
 
-  const [param, setParam] = React.useState<string | null>("randXSize");
-
-  const handleParam = (_event: React.MouseEvent, newParam: string | null): void => {
+  const handleParam = (_event: React.MouseEvent, newParam: typeof param): void => {
     setParam(newParam);
   };
 
   useEffect(() => {
     switch (true) {
       case param == "randXSize": {
-        sliderRandXSize();
+        setSliderConfig({
+          min: 0,
+          max: 4,
+          step: 0.1,
+          onChange: (num: number | number[]) => {
+            const rxs = Math.pow(10, num as number);
+            setRandXSize(Math.round(rxs));
+          },
+        });
+        setSliderValue(Math.log10(randXSize));
         break;
       }
       case param == "numBins": {
-        sliderNumBins();
+        setSliderConfig({
+          min: 2,
+          max: 1000,
+          step: 1,
+          onChange: (num: number | number[]) => {
+            setNumBins(num as number);
+          },
+        });
+        setSliderValue(numBins);
         break;
       }
       case param == "Xrange": {
-        sliderXrange();
+        setSliderConfig({
+          min: 0,
+          max: 100,
+          step: 1,
+          onChange: (num: number | number[]) => {
+            setXrange(num as number[]);
+          },
+        });
+        setSliderValue(Xrange);
         break;
       }
       case param == "Xskew": {
-        sliderXskew();
+        setSliderConfig({
+          min: 0,
+          max: 5,
+          step: 0.01,
+          onChange: (num: number | number[]) => {
+            setXskew(num as number);
+          },
+        });
+        setSliderValue(Xskew);
+        break;
+      }
+      case param == "yScale": {
+        setSliderConfig({
+          min: 0,
+          max: 5,
+          step: 0.01,
+          onChange: (num: number | number[]) => {
+            webglp.gScaleY = num as number;
+          },
+        });
+        setSliderValue(webglp.gScaleY);
         break;
       }
     }
   }, [param]);
-
-  const sliderRandXSize = (): void => {
-    console.log("change");
-    setSliderComp(
-      <CustomSlider
-        key={Math.random()}
-        min={0}
-        max={4}
-        step={0.1}
-        defaultValue={Math.log10(randXSize)}
-        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
-          const rxs = Math.pow(10, newSlider as number);
-          setRandXSize(Math.round(rxs));
-        }}
-      />
-    );
-  };
-
-  const sliderNumBins = (): void => {
-    console.log("change");
-    setSliderComp(
-      <CustomSlider
-        key={Math.random()}
-        min={2}
-        max={1000}
-        step={1}
-        defaultValue={numBins}
-        //onChange={onDrag}
-        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
-          setNumBins(newSlider as number);
-        }}
-      />
-    );
-  };
-
-  const sliderXrange = (): void => {
-    console.log("change");
-    setSliderComp(
-      <CustomSlider
-        key={Math.random()}
-        min={0}
-        max={100}
-        step={1}
-        defaultValue={Xrange}
-        //onChange={onDrag}
-        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
-          setXrange(newSlider as number[]);
-        }}
-      />
-    );
-  };
-
-  const sliderXskew = (): void => {
-    console.log("change");
-    setSliderComp(
-      <CustomSlider
-        key={Math.random()}
-        min={0}
-        max={5}
-        step={0.01}
-        defaultValue={Xskew}
-        //onChange={onDrag}
-        onChange={(_event: React.SyntheticEvent, newSlider: unknown) => {
-          setXskew(newSlider as number);
-        }}
-      />
-    );
-  };
 
   const paramStyle = {
     //fontSize: "1.5em",
@@ -293,15 +283,24 @@ export default function WebglAppHistogram(): JSX.Element {
             <ToggleButton value="Xskew" aria-label="bold">
               <span style={paramStyle}>Skew</span>
             </ToggleButton>
+            <ToggleButton value="yScale" aria-label="bold">
+              <span style={paramStyle}>Y Scale</span>
+            </ToggleButton>
           </ToggleButtonGroup>
 
-          <Chip style={paramStyle} avatar={<Avatar>X</Avatar>} label={randXSize} />
-          <Chip style={paramStyle} avatar={<Avatar>B</Avatar>} label={numBins} />
-          <Chip style={paramStyle} avatar={<Avatar>X</Avatar>} label={Xrange[0]} />
-          <Chip style={paramStyle} avatar={<Avatar>M</Avatar>} label={Xrange[1]} />
-          <Chip style={paramStyle} avatar={<Avatar>S</Avatar>} label={Xskew} />
+          <Chip style={paramStyle} avatar={<Avatar>i</Avatar>} label={sliderValue} />
 
-          {sliderComp}
+          <CustomSlider
+            min={sliderConfig.min}
+            max={sliderConfig.max}
+            step={sliderConfig.step}
+            value={sliderValue}
+            onChange={(_event: React.SyntheticEvent, newSlider: unknown): void => {
+              sliderConfig.onChange(newSlider as number);
+              setSliderValue(newSlider as number);
+            }}
+            aria-labelledby="con-slider"
+          />
         </div>
 
         <p>Move the slider!</p>

@@ -111,7 +111,7 @@ export default function HamMenu({ menuList, pageId }: Prop): JSX.Element {
         </List>
         <Divider />
         <MuiLink
-          href="https://github.com/danchitnis"
+          href="https://github.com/danchitnis/webgl-plot"
           target="_blank"
           rel="noopener"
           variant="inherit"
