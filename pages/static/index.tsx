@@ -10,7 +10,7 @@ import CustomSlider from "../../components/CustomSlider";
 import WebGlPlot, { WebglLine, ColorRGBA } from "webgl-plot";
 
 import Layout from "../../components/Layout";
-import InfoTable from "./infoTable";
+import InfoTable from "../../components/infoTable";
 
 let webglp: WebGlPlot;
 //let lines: WebglLine[];
@@ -18,18 +18,13 @@ let webglp: WebGlPlot;
 
 const RectZ = new WebglLine(new ColorRGBA(1, 1, 1, 1), 4);
 
-type WheelZoom = {
-  scale: number;
-  offset: number;
-};
-
-type Drag = {
+type MouseDrag = {
   started: boolean;
   dragInitialX: number;
   dragOffsetOld: number;
 };
 
-type Zoom = {
+type MouseZoom = {
   started: boolean;
   cursorDownX: number;
   cursorOffsetX: number;
@@ -43,12 +38,19 @@ type ZoomStatus = {
 export default function WebglAppRandom(): JSX.Element {
   const [numX, setNumX] = useState(3);
   const [numLines, setNumLines] = useState(1);
-  const [wheelZoom, setWheelZoom] = useState<WheelZoom>({ scale: 1, offset: 0 });
 
   const [zoomStatus, setZoomStatus] = useState<ZoomStatus>({ scale: 1, offset: 0 });
 
-  const [zoom, setZoom] = useState<Zoom>({ started: false, cursorDownX: 0, cursorOffsetX: 0 });
-  const [drag, setDrag] = useState<Drag>({ started: false, dragInitialX: 0, dragOffsetOld: 0 });
+  const [mouseZoom, setMouseZoom] = useState<MouseZoom>({
+    started: false,
+    cursorDownX: 0,
+    cursorOffsetX: 0,
+  });
+  const [mouseDrag, setMouseDrag] = useState<MouseDrag>({
+    started: false,
+    dragInitialX: 0,
+    dragOffsetOld: 0,
+  });
 
   const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
   const numXList = [
@@ -102,7 +104,7 @@ export default function WebglAppRandom(): JSX.Element {
 
   useEffect(() => {
     setZoomStatus({ scale: webglp.gScaleX, offset: webglp.gOffsetX / webglp.gScaleX });
-  }, [drag, zoom, wheelZoom]);
+  }, [mouseDrag, mouseZoom]);
 
   useEffect(() => {
     webglp.removeAllLines();
@@ -163,12 +165,12 @@ export default function WebglAppRandom(): JSX.Element {
     //const width = canvasMain.current == undefined ? 1 : canvasMain.current.width;
 
     const cursorOffsetX = (-2 * (e.clientX - eOffset - width / 2)) / width;
-    let scale = wheelZoom.scale;
-    let offset = wheelZoom.offset;
+    let scale = zoomStatus.scale; //wheelZoom.scale;
+    let offset = zoomStatus.offset;
 
     if (e.shiftKey) {
-      offset = +e.deltaY * 0.1;
-      webglp.gOffsetX = 0.1 * offset;
+      offset += (e.deltaY / width) * 10;
+      webglp.gOffsetX = offset;
     } else {
       scale += e.deltaY * -0.01;
       scale = Math.min(100, scale);
@@ -176,6 +178,7 @@ export default function WebglAppRandom(): JSX.Element {
       const gScaleXOld = webglp.gScaleX;
 
       webglp.gScaleX = 1 * Math.pow(scale, 1.5);
+      //webglp.gScaleX = 1 * scale;
       if (scale > 1 && scale < 100) {
         webglp.gOffsetX = ((webglp.gOffsetX + cursorOffsetX) * webglp.gScaleX) / gScaleXOld;
       }
@@ -183,8 +186,9 @@ export default function WebglAppRandom(): JSX.Element {
         webglp.gOffsetX = 0;
       }
     }
-    console.log(wheelZoom);
-    setWheelZoom({ scale: scale, offset: offset });
+    console.log(zoomStatus);
+    //setWheelZoom({ scale: scale, offset: offset });
+    setZoomStatus({ scale: scale, offset: offset });
     //webglp.update();
   };
 
@@ -197,14 +201,14 @@ export default function WebglAppRandom(): JSX.Element {
       (e.target as HTMLCanvasElement).style.cursor = "pointer";
       const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
       const cursorDownX = (2 * (e.clientX - eOffset - width / 2)) / width;
-      setZoom({ started: true, cursorDownX: cursorDownX, cursorOffsetX: 0 });
+      setMouseZoom({ started: true, cursorDownX: cursorDownX, cursorOffsetX: 0 });
       //RectZ.visible = true;
     }
     if (e.button == 2) {
       (e.target as HTMLCanvasElement).style.cursor = "grabbing";
       const dragInitialX = (e.clientX - eOffset) * devicePixelRatio;
       const dragOffsetOld = webglp.gOffsetX;
-      setDrag({ started: true, dragInitialX: dragInitialX, dragOffsetOld: dragOffsetOld });
+      setMouseDrag({ started: true, dragInitialX: dragInitialX, dragOffsetOld: dragOffsetOld });
     }
 
     //const canvas = canvasMain.current;
@@ -213,13 +217,17 @@ export default function WebglAppRandom(): JSX.Element {
   const mouseMove = (e: React.MouseEvent) => {
     const eOffset = (e.target as HTMLCanvasElement).getBoundingClientRect().x;
     const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
-    if (zoom.started) {
+    if (mouseZoom.started) {
       const cursorOffsetX = (2 * (e.clientX - eOffset - width / 2)) / width;
-      setZoom({ started: true, cursorDownX: zoom.cursorDownX, cursorOffsetX: cursorOffsetX });
+      setMouseZoom({
+        started: true,
+        cursorDownX: mouseZoom.cursorDownX,
+        cursorOffsetX: cursorOffsetX,
+      });
       RectZ.xy = new Float32Array([
-        (zoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
+        (mouseZoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
         -1,
-        (zoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
+        (mouseZoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
         1,
         (cursorOffsetX - webglp.gOffsetX) / webglp.gScaleX,
         1,
@@ -228,33 +236,33 @@ export default function WebglAppRandom(): JSX.Element {
       ]);
       RectZ.visible = true;
     }
-
-    if (drag.started) {
-      const moveX = (e.clientX - eOffset) * devicePixelRatio - drag.dragInitialX;
+    /************Mouse Drag Evenet********* */
+    if (mouseDrag.started) {
+      const moveX = (e.clientX - eOffset) * devicePixelRatio - mouseDrag.dragInitialX;
       const offsetX = (webglp.gScaleY * moveX) / width;
-      webglp.gOffsetX = offsetX + drag.dragOffsetOld;
+      webglp.gOffsetX = offsetX + mouseDrag.dragOffsetOld;
     }
   };
 
   const mouseUp = (e: React.MouseEvent) => {
     e.preventDefault();
     const eOffset = (e.target as HTMLCanvasElement).getBoundingClientRect().x;
-    if (zoom.started) {
-      //const width = canvasMain.current.width;
+    if (mouseZoom.started) {
       const width = (e.target as HTMLCanvasElement).getBoundingClientRect().width;
       const cursorUpX = (2 * (e.clientX - eOffset - width / 2)) / width;
-      const zoomFactor = Math.abs(cursorUpX - zoom.cursorDownX) / (2 * webglp.gScaleX);
+      const zoomFactor = Math.abs(cursorUpX - mouseZoom.cursorDownX) / (2 * webglp.gScaleX);
       const offsetFactor =
-        (zoom.cursorDownX + cursorUpX - 2 * webglp.gOffsetX) / (2 * webglp.gScaleX);
+        (mouseZoom.cursorDownX + cursorUpX - 2 * webglp.gOffsetX) / (2 * webglp.gScaleX);
 
       if (zoomFactor > 0) {
         webglp.gScaleX = 1 / zoomFactor;
         webglp.gOffsetX = -offsetFactor / zoomFactor;
       }
 
-      setZoom({ started: false, cursorDownX: 0, cursorOffsetX: 0 });
+      setMouseZoom({ started: false, cursorDownX: 0, cursorOffsetX: 0 });
     }
-    setDrag({ started: false, dragInitialX: 0, dragOffsetOld: 0 });
+    /************Mouse Drag Evenet********* */
+    setMouseDrag({ started: false, dragInitialX: 0, dragOffsetOld: 0 });
     (e.target as HTMLCanvasElement).style.cursor = "grab";
     RectZ.visible = false;
   };
@@ -263,6 +271,7 @@ export default function WebglAppRandom(): JSX.Element {
     e.preventDefault();
     webglp.gScaleX = 1;
     webglp.gOffsetX = 0;
+    setZoomStatus({ scale: webglp.gScaleX, offset: webglp.gOffsetX });
   };
 
   const contextMenu = (e: React.MouseEvent) => {
@@ -314,6 +323,12 @@ export default function WebglAppRandom(): JSX.Element {
   const handleParam = (_event: React.MouseEvent<HTMLElement>, newParam: typeof param): void => {
     setParam(newParam);
   };
+
+  /*const [paramXY, setParamXY] = React.useState<"xAxis" | "yAxis">("xAxis");
+
+  const handleParamXY = (_event: React.MouseEvent<HTMLElement>, newParam: typeof paramXY): void => {
+    setParamXY(newParam);
+  };*/
 
   useEffect(() => {
     switch (true) {
@@ -417,18 +432,24 @@ export default function WebglAppRandom(): JSX.Element {
             </ToggleButton>
           </ToggleButtonGroup>
 
+          {/*<span> </span>
+
+          <ToggleButtonGroup
+            style={{ textTransform: "none" }}
+            value={paramXY}
+            exclusive
+            onChange={handleParamXY}
+            aria-label="text formatting">
+            <ToggleButton value="xAxis" aria-label="X">
+              <span style={paramStyle}>X</span>
+            </ToggleButton>
+            <ToggleButton value="yAxis" aria-label="Y">
+              <span style={paramStyle}>Y</span>
+            </ToggleButton>
+          </ToggleButtonGroup>*/}
+
           <Chip style={paramStyle} avatar={<Avatar>D</Avatar>} label={numXList[numX]} />
           <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={numList[numLines]} />
-          <Chip
-            style={paramStyle}
-            avatar={<Avatar>Z</Avatar>}
-            label={`${zoomStatus.scale.toFixed(3)}`}
-          />
-          <Chip
-            style={paramStyle}
-            avatar={<Avatar>O</Avatar>}
-            label={`${zoomStatus.offset.toExponential(3)}`}
-          />
 
           {param == "numX" ? <SliderNumX /> : <SliderNumLine />}
         </div>
