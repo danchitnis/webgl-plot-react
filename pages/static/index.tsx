@@ -10,6 +10,7 @@ import CustomSlider from "../../components/CustomSlider";
 import WebGlPlot, { WebglLine, ColorRGBA } from "webgl-plot";
 
 import Layout from "../../components/Layout";
+import InfoTable from "./infoTable";
 
 let webglp: WebGlPlot;
 //let lines: WebglLine[];
@@ -117,14 +118,16 @@ export default function WebglAppRandom(): JSX.Element {
     }
 
     webglp.lines.forEach((line) => {
+      const limit = 0.99;
+
       (line as WebglLine).setY(0, Math.random() - 0.5);
       for (let i = 1; i < line.numPoints; i++) {
         let y = (line as WebglLine).getY(i - 1) + 0.01 * (Math.round(Math.random()) - 0.5);
-        if (y > 0.9) {
-          y = 0.9;
+        if (y > limit) {
+          y = limit;
         }
-        if (y < -0.9) {
-          y = -0.9;
+        if (y < -limit) {
+          y = -limit;
         }
         (line as WebglLine).setY(i, y);
       }
@@ -325,22 +328,24 @@ export default function WebglAppRandom(): JSX.Element {
     }
   }, [param]);
 
-  const LeftSide = (): JSX.Element => {
-    let left = 0;
+  const InfoTableXY = (): JSX.Element => {
+    let leftX = 0;
+    let deltaX = 0;
+    let bottomY = 0;
+    let deltaY = 0;
     if (webglp) {
-      left = (-1 * webglp.gOffsetX - 1) / webglp.gScaleX;
-    }
-    return <span>{`${left.toExponential(2)} + 0`}</span>;
-  };
+      leftX = (-1 * webglp.gOffsetX - 1) / webglp.gScaleX;
+      deltaX = 2 / webglp.gScaleX;
 
-  const RightSide = (): JSX.Element => {
-    let left = 0;
-    let right = 0;
-    if (webglp) {
-      left = (-1 * webglp.gOffsetX - 1) / webglp.gScaleX;
-      right = 2 / webglp.gScaleX;
+      bottomY = (-1 * webglp.gOffsetY - 1) / webglp.gScaleY;
+      deltaY = 2 / webglp.gScaleY;
     }
-    return <span>{`${left.toExponential(2)} + ${right.toExponential(2)}`}</span>;
+    return (
+      <div>
+        <InfoTable id="X" d1={leftX} d2={leftX + deltaX} />
+        <InfoTable id="Y" d1={bottomY} d2={bottomY + deltaY} />
+      </div>
+    );
   };
 
   const paramStyle = {
@@ -348,7 +353,7 @@ export default function WebglAppRandom(): JSX.Element {
     marginLeft: "1em",
     marginRight: "1em",
     textTransform: "none" as const,
-  };
+  } as React.CSSProperties;
 
   /*
  <div style={{ width: "10%", height: "3em", position: "absolute" }}>
@@ -389,9 +394,11 @@ export default function WebglAppRandom(): JSX.Element {
                   justifyContent: "space-between",
                 } as React.CSSProperties
               }>
-              <LeftSide />
-              <RightSide />
+              <span>X1</span>
+              <span>X2</span>
             </div>
+
+            <InfoTableXY />
           </div>
 
           <br />
