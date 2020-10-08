@@ -14,7 +14,7 @@
     "@material-ui/icons": "^5.0.0-alpha.7",
     "@material-ui/lab": "^5.0.0-alpha.7",
     "comlink": "^4.3.0",
-    "next": "9.5.3",
+    "next": "9.5.4",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "webgl-plot": "^0.5.1"
