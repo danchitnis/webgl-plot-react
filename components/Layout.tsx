@@ -22,8 +22,7 @@ export default function Layout({ children, title = "Examples", id }: Props): JSX
     () =>
       createMuiTheme({
         palette: {
-          //type: prefersDarkMode ? "dark" : "light",
-          type: "dark",
+          mode: prefersDarkMode ? 'dark' : 'light',
         },
         //overrides: {},
         typography: {
