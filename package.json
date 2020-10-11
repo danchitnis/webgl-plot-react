@@ -13,7 +13,7 @@
     "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
     "@material-ui/core": "^5.0.0-alpha.12",
-    "@material-ui/icons": "^5.0.0-alpha.12",
+    "@material-ui/icons": "^5.0.0-alpha.11",
     "@material-ui/lab": "^5.0.0-alpha.12",
     "comlink": "^4.3.0",
     "next": "9.5.5",

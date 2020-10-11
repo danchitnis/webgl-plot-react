@@ -1170,7 +1170,7 @@
     react-is "^16.8.0"
     react-transition-group "^4.4.0"
 
-"@material-ui/icons@^5.0.0-alpha.12":
+"@material-ui/icons@^5.0.0-alpha.11":
   version "5.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-5.0.0-alpha.11.tgz#ffefac5b4ba3e7895a57e29ff7f67eba4d9e4d0b"
   integrity sha512-rQA599j0g1LHd88/zAx5YBSGR0iktSOwTRRaP2CXrxqoh5KvNqted2Kc3FPpe0rbeEIT1sCge5PDEKvov8fLUw==
