@@ -4,10 +4,7 @@ import Layout from "../../components/Layout";
 import * as Comlink from "comlink";
 import { WorkerApi } from "../../workers/comlink.worker";
 
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-
-import { Chip, Avatar } from "@material-ui/core";
+import { Chip, Avatar, ToggleButton, ToggleButtonGroup } from "@material-ui/core";
 
 import CustomSlider from "../../components/CustomSlider";
 

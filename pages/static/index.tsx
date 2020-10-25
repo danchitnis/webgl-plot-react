@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-
-import { Chip, Avatar } from "@material-ui/core";
+import { Chip, Avatar, ToggleButton, ToggleButtonGroup } from "@material-ui/core";
 
 import CustomSlider from "../../components/CustomSlider";
 

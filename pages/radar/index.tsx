@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-
 import WebGlPlot, { WebglPolar, ColorRGBA } from "webgl-plot";
 
-import { Chip, Avatar } from "@material-ui/core";
+import { Chip, Avatar, ToggleButton, ToggleButtonGroup } from "@material-ui/core";
 
 import CustomSlider from "../../components/CustomSlider";
 import Layout from "../../components/Layout";
