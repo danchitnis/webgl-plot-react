@@ -113,10 +113,10 @@ export default function WebglAppRandom(): JSX.Element {
       const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 1);
       const line = new WebglLine(color, numXList[numX]);
       line.lineSpaceX(-1, 2 / numXList[numX]);
-      webglp.addLine(line);
+      webglp.addDataLine(line);
     }
 
-    webglp.lines.forEach((line) => {
+    webglp.linesData.forEach((line) => {
       const limit = 0.99;
 
       (line as WebglLine).setY(0, Math.random() - 0.5);

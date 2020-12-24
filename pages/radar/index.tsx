@@ -117,13 +117,13 @@ export default function RadarApp(): JSX.Element {
   }, [webglp]);*/
 
   useEffect(() => {
-    if (webglp?.lines) {
-      if (lineNum < webglp.lines.length) {
-        while (lineNum < webglp.lines.length) {
-          webglp.popLine();
+    if (webglp?.linesData) {
+      if (lineNum < webglp.linesData.length) {
+        while (lineNum < webglp.linesData.length) {
+          webglp.popDataLine();
         }
       } else {
-        while (lineNum > webglp.lines.length) {
+        while (lineNum > webglp.linesData.length) {
           const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 0.8);
           const line = new WebglPolar(color, numX);
           for (let i = 0; i < line.numPoints; i++) {
@@ -146,7 +146,7 @@ export default function RadarApp(): JSX.Element {
       //const noise = 0.1;
       //const amp = 0.5;
 
-      webglp?.lines.forEach((line) => {
+      webglp?.linesData.forEach((line) => {
         if (indexNow < line.numPoints) {
           const theta = (indexNow * 360) / line.numPoints;
           let r = noiseAmp * (Math.random() - 0.5) + preR;

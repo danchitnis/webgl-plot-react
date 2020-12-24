@@ -63,7 +63,7 @@ export default function WebglAppRandom(): JSX.Element {
     };
 
     let renderPlot = (): void => {
-      webglp.lines.forEach((line) => {
+      webglp.linesData.forEach((line) => {
         const yArray = randomWalk((line as WebglLine).getY(numX - 1), shiftSize);
         (line as WebglLine).shiftAdd(yArray);
       });

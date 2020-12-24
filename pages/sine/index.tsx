@@ -124,13 +124,13 @@ export default function SinApp(): JSX.Element {
   }, [webglp]);*/
 
   useEffect(() => {
-    if (webglp?.lines) {
-      if (lineNum < webglp.lines.length) {
-        while (lineNum < webglp.lines.length) {
-          webglp.popLine();
+    if (webglp?.linesData) {
+      if (lineNum < webglp.linesData.length) {
+        while (lineNum < webglp.linesData.length) {
+          webglp.popDataLine();
         }
       } else {
-        while (lineNum > webglp.lines.length) {
+        while (lineNum > webglp.linesData.length) {
           const color = new ColorRGBA(Math.random(), Math.random(), Math.random(), 0.8);
           const line = new WebglLine(color, numX);
           line.lineSpaceX(-1, 2 / numX);
@@ -150,7 +150,7 @@ export default function SinApp(): JSX.Element {
       const noiseA = noiseAmp == undefined ? 0.1 : noiseAmp;
       const noiseP = noisePhase == undefined ? 0 : noisePhase;
 
-      webglp?.lines.forEach((line, index) => {
+      webglp?.linesData.forEach((line, index) => {
         const phase = (noiseP / 5) * 2 * Math.PI * Math.random() + (index / lineNum) * Math.PI * 2;
 
         for (let i = 0; i < line.numPoints; i++) {

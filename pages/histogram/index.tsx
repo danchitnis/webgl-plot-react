@@ -140,7 +140,7 @@ export default function WebglAppHistogram(): JSX.Element {
       // Normalize ?
       for (let i = 0; i < ybins.length; i++) {
         const y = (ybins[i] / randXSize) * numBins;
-        (webglp.lines[0] as WebglStep).setY(i, y * 0.02);
+        (webglp.linesData[0] as WebglStep).setY(i, y * 0.02);
       }
 
       id = requestAnimationFrame(renderPlot);
