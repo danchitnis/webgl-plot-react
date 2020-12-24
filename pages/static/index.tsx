@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import { Chip, Avatar, ToggleButton, ToggleButtonGroup } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 
 import CustomSlider from "../../components/CustomSlider";
 
@@ -10,10 +11,10 @@ import Layout from "../../components/Layout";
 import InfoTable from "../../components/infoTable";
 
 let webglp: WebGlPlot;
-//let lines: WebglLine[];
-//let numX = 1000;
 
-const RectZ = new WebglLine(new ColorRGBA(1, 1, 1, 1), 4);
+const zoomRect = new WebglLine(new ColorRGBA(1, 1, 1, 1), 4);
+const crossXLine = new WebglLine(new ColorRGBA(0.1, 1, 0.1, 1), 2);
+const crossYLine = new WebglLine(new ColorRGBA(0.1, 1, 0.1, 1), 2);
 
 type MouseDrag = {
   started: boolean;
@@ -48,6 +49,8 @@ export default function WebglAppRandom(): JSX.Element {
     dragInitialX: 0,
     dragOffsetOld: 0,
   });
+
+  const [isCrosshair, setIsCrosshair] = React.useState(false);
 
   const numList = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
   const numXList = [
@@ -105,7 +108,9 @@ export default function WebglAppRandom(): JSX.Element {
 
   useEffect(() => {
     webglp.removeAllLines();
-    webglp.addLine(RectZ);
+    webglp.addAuxLine(zoomRect);
+    webglp.addAuxLine(crossXLine);
+    webglp.addAuxLine(crossYLine);
 
     const numLinesActual = numList[numLines];
 
@@ -132,18 +137,11 @@ export default function WebglAppRandom(): JSX.Element {
       }
     });
 
-    // add zoom rectangle
-    const Rect = new WebglLine(new ColorRGBA(0.9, 0.9, 0.9, 1), 4);
-    Rect.loop = true;
-    Rect.xy = new Float32Array([-0.5, -1, -0.5, 1, 0.5, 1, 0.5, -1]);
-    Rect.visible = false;
-    webglp.addLine(Rect);
-
     // test rec
     const testRect = new WebglLine(new ColorRGBA(0.1, 0.9, 0.9, 1), 4);
     testRect.loop = true;
     testRect.xy = new Float32Array([-0.7, -0.8, -0.7, 0.8, -0.6, 0.8, -0.6, -0.8]);
-    webglp.addLine(testRect);
+    webglp.addAuxLine(testRect);
 
     //wglp.viewport(0, 0, 1000, 1000);
     webglp.gScaleX = 1;
@@ -221,7 +219,7 @@ export default function WebglAppRandom(): JSX.Element {
         cursorDownX: mouseZoom.cursorDownX,
         cursorOffsetX: cursorOffsetX,
       });
-      RectZ.xy = new Float32Array([
+      zoomRect.xy = new Float32Array([
         (mouseZoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
         -1,
         (mouseZoom.cursorDownX - webglp.gOffsetX) / webglp.gScaleX,
@@ -231,7 +229,7 @@ export default function WebglAppRandom(): JSX.Element {
         (cursorOffsetX - webglp.gOffsetX) / webglp.gScaleX,
         -1,
       ]);
-      RectZ.visible = true;
+      zoomRect.visible = true;
     }
     /************Mouse Drag Evenet********* */
     if (mouseDrag.started) {
@@ -239,6 +237,28 @@ export default function WebglAppRandom(): JSX.Element {
       const offsetX = (webglp.gScaleY * moveX) / width;
       webglp.gOffsetX = offsetX + mouseDrag.dragOffsetOld;
     }
+    /*****************cross hair************** */
+    const canvas = canvasMain.current;
+    if (canvas) {
+      const x =
+        (1 / webglp.gScaleX) *
+        ((2 * ((e.pageX - canvas.offsetLeft) * devicePixelRatio - canvas.width / 2)) /
+          canvas.width -
+          webglp.gOffsetX);
+      const y =
+        (1 / webglp.gScaleY) *
+        ((2 * (canvas.height / 2 - (e.pageY - canvas.offsetTop) * devicePixelRatio)) /
+          canvas.height -
+          webglp.gOffsetY);
+      cross(x, y);
+    }
+  };
+
+  const cross = (x: number, y: number): void => {
+    crossXLine.xy = new Float32Array([x, -1, x, 1]);
+    crossYLine.xy = new Float32Array([-1, y, 1, y]);
+    //crossX = x;
+    //crossY = y;
   };
 
   const mouseUp = (e: React.MouseEvent) => {
@@ -261,7 +281,7 @@ export default function WebglAppRandom(): JSX.Element {
     /************Mouse Drag Evenet********* */
     setMouseDrag({ started: false, dragInitialX: 0, dragOffsetOld: 0 });
     (e.target as HTMLCanvasElement).style.cursor = "grab";
-    RectZ.visible = false;
+    zoomRect.visible = false;
   };
 
   const doubleClick = (e: React.MouseEvent) => {
@@ -360,6 +380,16 @@ export default function WebglAppRandom(): JSX.Element {
     );
   };
 
+  useEffect(() => {
+    if (isCrosshair) {
+      crossXLine.visible = true;
+      crossYLine.visible = true;
+    } else {
+      crossXLine.visible = false;
+      crossYLine.visible = false;
+    }
+  }, [isCrosshair]);
+
   const paramStyle = {
     fontSize: "1.5em",
     marginLeft: "1em",
@@ -429,24 +459,17 @@ export default function WebglAppRandom(): JSX.Element {
             </ToggleButton>
           </ToggleButtonGroup>
 
-          {/*<span> </span>
-
-          <ToggleButtonGroup
-            style={{ textTransform: "none" }}
-            value={paramXY}
-            exclusive
-            onChange={handleParamXY}
-            aria-label="text formatting">
-            <ToggleButton value="xAxis" aria-label="X">
-              <span style={paramStyle}>X</span>
-            </ToggleButton>
-            <ToggleButton value="yAxis" aria-label="Y">
-              <span style={paramStyle}>Y</span>
-            </ToggleButton>
-          </ToggleButtonGroup>*/}
-
           <Chip style={paramStyle} avatar={<Avatar>D</Avatar>} label={numXList[numX]} />
           <Chip style={paramStyle} avatar={<Avatar>N</Avatar>} label={numList[numLines]} />
+
+          <ToggleButton
+            value="check"
+            selected={isCrosshair}
+            onChange={() => {
+              setIsCrosshair(!isCrosshair);
+            }}>
+            <AddIcon fontSize="large" />
+          </ToggleButton>
 
           {param == "numX" ? <SliderNumX /> : <SliderNumLine />}
         </div>

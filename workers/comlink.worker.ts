@@ -54,7 +54,7 @@ export const WorkerApi = {
       const noiseA = noiseAmp == undefined ? 0.1 : noiseAmp;
       const noiseP = noisePhase == undefined ? 0 : noisePhase;
 
-      wglp.lines.forEach((line, index) => {
+      wglp.linesData.forEach((line, index) => {
         const phase = (noiseP / 5) * 2 * Math.PI * Math.random() + (index / lineNum) * Math.PI * 2;
 
         for (let i = 0; i < line.numPoints; i++) {
@@ -73,7 +73,7 @@ export const WorkerApi = {
 
     if (p_lineNum < lineNum) {
       while (p_lineNum < lineNum) {
-        wglp.popLine();
+        wglp.popDataLine();
         lineNum--;
       }
     } else {
