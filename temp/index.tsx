@@ -1,17 +1,17 @@
 import React, { useRef, useState, useEffect } from "react";
-import Layout from "../../components/Layout";
+import Layout from "../components/Layout";
 
-import * as Comlink from "comlink";
-import { WorkerApi } from "../../workers/comlink.worker";
+//import * as Comlink from "comlink";
+//import { WorkerApi } from "../../workers/comlink.worker";
 
 import { Chip, Avatar, ToggleButton, ToggleButtonGroup } from "@material-ui/core";
 
-import CustomSlider from "../../components/CustomSlider";
+import CustomSlider from "../components/CustomSlider";
 
 //Assuming one instance only otherwise use useRef
 //see here: https://www.emgoto.com/storing-values-with-useref/
-let comlinkWorker: Worker;
-let comlinkWorkerApi: Comlink.Remote<WorkerApi>;
+//let comlinkWorker: Worker;
+//let comlinkWorkerApi: Comlink.Remote<WorkerApi>;
 
 const lineNumberList = [
   1,
@@ -84,8 +84,8 @@ export default function OffScreen(): JSX.Element {
   //const comlinkWorkerApiRef = React.useRef<Comlink.Remote<WorkerApi>>();
 
   React.useEffect(() => {
-    comlinkWorker = new Worker("../../workers/comlink.worker", { type: "module" });
-    comlinkWorkerApi = Comlink.wrap<WorkerApi>(comlinkWorker);
+    //comlinkWorker = new Worker("../../workers/comlink.worker", { type: "module" });
+    //comlinkWorkerApi = Comlink.wrap<WorkerApi>(comlinkWorker);
 
     if (canvasMain.current) {
       const htmlCanvas = canvasMain.current;
@@ -93,25 +93,25 @@ export default function OffScreen(): JSX.Element {
 
       offscreen.width = htmlCanvas.clientWidth * window.devicePixelRatio;
       offscreen.height = htmlCanvas.clientHeight * window.devicePixelRatio;
-      handleComlinkWork(offscreen);
+      //handleComlinkWork(offscreen);
     }
 
     return () => {
-      comlinkWorker.terminate();
+      //comlinkWorker.terminate();
     };
   }, []);
 
   React.useEffect(() => {
-    comlinkWorkerApi.set(amp, freq, noiseAmp, noisePhase, lineOffset);
+    //comlinkWorkerApi.set(amp, freq, noiseAmp, noisePhase, lineOffset);
   }, [amp, freq, noiseAmp, noisePhase, lineOffset]);
 
   React.useEffect(() => {
-    comlinkWorkerApi.setLineNum(lineNum);
+    //comlinkWorkerApi.setLineNum(lineNum);
   }, [lineNum]);
 
-  const handleComlinkWork = async (canvas: OffscreenCanvas) => {
-    await comlinkWorkerApi.start(Comlink.transfer(canvas, [canvas]));
-  };
+  /*const handleComlinkWork = async (canvas: OffscreenCanvas) => {
+    //await comlinkWorkerApi.start(Comlink.transfer(canvas, [canvas]));
+  };*/
 
   const handleChange = (_event: React.SyntheticEvent, newSlider: unknown): void => {
     //console.log(event);
